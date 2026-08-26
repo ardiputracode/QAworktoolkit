@@ -18,6 +18,8 @@ Aplikasi ini membantu QA engineer dalam:
 
 QA Toolkit dikembangkan untuk menjawab real-world QA challenge dengan memanfaatkan AI secara praktis untuk meningkatkan produktivitas QA.
 
+QA Toolkit direncanakan sebagai aplikasi desktop Windows yang diinstall pada PC pengguna menggunakan installer.
+
 ## Konsep Utama
 
 > Satu aplikasi lokal untuk membantu QA menyusun QA Progress Report berbasis Jira dan mengubah catatan bug menjadi bug description yang siap dipaste ke Jira dengan bantuan AI.
@@ -77,6 +79,7 @@ QA Toolkit menggabungkan:
 - Local data storage
 - Automatic draft saving
 - Secure credential management
+- Installer-based desktop deployment
 
 ## Solution 1 — Faster QA Reporting
 
@@ -119,7 +122,7 @@ AI membantu mengubah catatan tersebut menjadi bug description yang lebih terstru
 
 ## Solution 3 — Local Productivity Workflow
 
-Draft pekerjaan disimpan secara lokal.
+Draft pekerjaan disimpan secara lokal pada perangkat pengguna.
 
 Aplikasi tidak membutuhkan server khusus milik QA Toolkit.
 
@@ -339,28 +342,31 @@ QA engineer tetap melakukan review sebelum hasil digunakan pada Jira.
 # 7. Application Architecture
 
 ```text
-                    QA Toolkit.exe
-                          |
-                          v
-            Electron Application Framework
-                          |
-        +-----------------+----------------+
-        |                                  |
-        v                                  v
-Frontend Layer                    Local Data Layer
-HTML / CSS / JS                   IndexedDB
-                                  OS Credential Storage
-        |
-        |
-        +----------------+
-                         |
-                         v
-              External Integration Layer
-                         |
-              +----------+----------+
-              |                     |
-              v                     v
-        Jira Cloud API       Open WebUI API
+                    QA Toolkit
+                        |
+                        v
+              Installed on Windows
+                        |
+                        v
+          Electron Application Framework
+                        |
+       +----------------+----------------+
+       |                                 |
+       v                                 v
+Frontend Layer                   Local Data Layer
+HTML / CSS / JS                  IndexedDB
+                                 OS Credential Storage
+       |
+       |
+       +----------------+
+                        |
+                        v
+             External Integration Layer
+                        |
+             +----------+----------+
+             |                     |
+             v                     v
+       Jira Cloud API       Open WebUI API
 ```
 
 ---
@@ -379,11 +385,13 @@ Tidak diperlukan biaya lisensi Electron untuk membuat aplikasi desktop menggunak
 
 ### Alasan Pemilihan
 
-- Dapat menghasilkan aplikasi desktop `.exe`
+- Dapat menghasilkan aplikasi desktop Windows
 - Menggunakan teknologi web yang relatif mudah dipelajari
 - Mendukung integrasi dengan fitur lokal sistem operasi
 - Cocok untuk aplikasi local-first
-- Mendukung aplikasi portable
+- Mendukung distribusi aplikasi melalui installer
+- Memungkinkan pengelolaan aplikasi dan versi secara lebih terstruktur
+- Memungkinkan pengembangan mekanisme update aplikasi di masa depan
 - Memungkinkan frontend dan desktop functionality berada dalam satu aplikasi
 
 ### Security Consideration
@@ -688,7 +696,7 @@ backup.json
 
 Credential memiliki perlakuan keamanan yang berbeda dari data aplikasi.
 
-Data draft dapat dipindahkan ke PC lain, sedangkan API token tetap disimpan secara terpisah menggunakan OS Credential Storage.
+Data draft dapat dipindahkan ke PC lain melalui fitur export/import, sedangkan API token tetap disimpan secara terpisah menggunakan OS Credential Storage.
 
 Pada PC baru, user perlu memasukkan credential kembali.
 
@@ -909,6 +917,7 @@ Validated Bug Description
 Target MVP:
 
 - Electron desktop application
+- Windows installer
 - HTML/CSS/JavaScript frontend
 - Jira-connected QA Report Builder
 - QA Progress Report
@@ -922,7 +931,46 @@ Target MVP:
 
 ---
 
-# 22. Roadmap Development
+# 22. Deployment Strategy
+
+QA Toolkit akan didistribusikan sebagai aplikasi desktop Windows menggunakan installer.
+
+## Tujuan Installer
+
+Installer digunakan untuk:
+
+- Menginstall QA Toolkit pada PC pengguna
+- Menempatkan application files pada lokasi yang sesuai
+- Membuat shortcut aplikasi
+- Mempermudah proses instalasi dan penggunaan
+- Mengelola versi aplikasi secara lebih terstruktur
+- Menjadi fondasi apabila mekanisme update ditambahkan di masa depan
+
+## Application Files dan User Data
+
+Application files dan user data dipisahkan.
+
+```text
+Windows PC
+    |
+    +-- QA Toolkit Application
+    |       |
+    |       +-- Installed Application Files
+    |
+    +-- Local User Data
+            |
+            +-- IndexedDB
+            |
+            +-- OS Credential Storage
+```
+
+Tujuannya agar perubahan, upgrade, atau reinstall aplikasi tidak secara otomatis dianggap sebagai penghapusan data user.
+
+Implementasi akhir lokasi data akan mengikuti mekanisme penyimpanan yang digunakan Electron dan Windows.
+
+---
+
+# 23. Roadmap Development
 
 ## Phase 1 — Prototype
 
@@ -998,21 +1046,23 @@ Menambahkan AI-assisted bug report preparation.
 
 ### Target
 
-Membuat aplikasi desktop yang siap digunakan.
+Membuat aplikasi desktop Windows yang siap diinstall dan digunakan.
 
 ### Scope
 
 - Production Electron build
-- QA Toolkit.exe
+- Windows installer creation
+- Application installation workflow
+- Application shortcut
 - OS Credential Storage
 - Secure token handling
 - Backup and restore
-- Portable deployment
+- Upgrade/reinstall validation
 - Final testing
 
 ---
 
-# 23. Expected Impact
+# 24. Expected Impact
 
 QA Toolkit diharapkan dapat:
 
@@ -1025,7 +1075,7 @@ QA Toolkit diharapkan dapat:
 
 ---
 
-# 24. Success Criteria
+# 25. Success Criteria
 
 Keberhasilan QA Toolkit akan dilihat dari seberapa baik aplikasi menyelesaikan workflow nyata QA.
 
@@ -1067,9 +1117,18 @@ dengan tetap melakukan review sebelum digunakan.
 - Token tidak masuk backup
 - Credential dikelola melalui OS Credential Storage
 
+## Application Deployment
+
+User dapat:
+
+- Menginstall QA Toolkit menggunakan installer
+- Menjalankan aplikasi melalui shortcut Windows
+- Menggunakan aplikasi tanpa konfigurasi instalasi yang kompleks
+- Melakukan reinstall atau upgrade aplikasi tanpa kehilangan data lokal selama mekanisme penyimpanan tetap kompatibel
+
 ---
 
-# 25. Development Notes
+# 26. Development Notes
 
 Dokumen ini merupakan technical proposal dan development direction awal.
 
@@ -1086,13 +1145,15 @@ Implementasi akhir dapat mengalami penyesuaian berdasarkan:
 
 Tidak semua detail implementasi harus dipertahankan apabila ditemukan pendekatan yang lebih sederhana, aman, stabil, atau sesuai kebutuhan.
 
+Fitur seperti mekanisme update aplikasi dapat ditambahkan pada pengembangan berikutnya tanpa menjadi bagian wajib dari MVP apabila fondasi deployment dan struktur aplikasi sudah mendukung.
+
 Prinsip utama project tetap dipertahankan:
 
 > Menyelesaikan real-world QA challenge dengan memanfaatkan AI secara praktis, terukur, dan tetap berada dalam kontrol QA engineer.
 
 ---
 
-# 26. Conclusion
+# 27. Conclusion
 
 QA Toolkit adalah:
 
@@ -1100,6 +1161,7 @@ QA Toolkit adalah:
 - Jira-connected QA reporting assistant
 - AI-assisted bug report preparation tool
 - Local-first QA workflow application
+- Installer-based Windows desktop application
 
 Solusi ini menggabungkan:
 
@@ -1132,13 +1194,30 @@ Jira Cloud API
 Open WebUI API
 ```
 
+## Deployment
+
+```text
+QA Toolkit Installer
+        |
+        v
+Install on Windows
+        |
+        v
+QA Toolkit
+        |
+        +-- Local Draft Storage
+        +-- Secure Credential Storage
+        +-- Jira Cloud Integration
+        +-- Open WebUI Integration
+```
+
 ## Tujuan Akhir
 
 > Membantu QA engineer menyusun QA Progress Report dengan lebih cepat dan mengubah catatan bug menjadi bug description yang siap dipaste ke Jira, dengan memanfaatkan AI untuk mengurangi pekerjaan manual yang berulang.
 
 ---
 
-# 27. Final Principle
+# 28. Final Principle
 
 > AI should assist the QA workflow, not replace QA judgment.
 
