@@ -5,26 +5,22 @@
 
 # 1. Project Overview
 
-QA Toolkit adalah solusi AI-assisted QA productivity tool yang dirancang untuk menyelesaikan tantangan nyata dalam aktivitas Quality Assurance.
+QA Toolkit adalah aplikasi desktop yang dirancang untuk membantu QA engineer menyelesaikan pekerjaan reporting dan dokumentasi bug secara lebih cepat dengan memanfaatkan AI dan integrasi Jira.
 
 Aplikasi ini membantu QA engineer dalam:
 
-- Menyusun report QA dengan mengisi form yang sudah disediakan
+- Menyusun QA Progress Report dengan mengisi form yang sudah disediakan
 - Mengambil data pendukung dari Jira melalui integrasi API
-- Menggabungkan input manual dan data Jira menjadi report yang siap digunakan
-- Mengubah catatan bug mentah menjadi bug report terstruktur dengan bantuan AI
-- Mengurangi pekerjaan manual yang berulang dan meningkatkan konsistensi output QA
+- Menggabungkan input manual dan data Jira menjadi report yang tersusun rapi
+- Mengubah catatan bug mentah menjadi bug description terstruktur dengan bantuan AI
+- Mengurangi pekerjaan manual yang berulang
+- Meningkatkan konsistensi output QA
 
-Aplikasi ini dirancang sebagai:
-
-- Desktop QA productivity application
-- Jira-connected QA reporting assistant
-- AI-assisted bug report preparation tool
-- Local-first application architecture
+QA Toolkit dikembangkan untuk menjawab real-world QA challenge dengan memanfaatkan AI secara praktis untuk meningkatkan produktivitas QA.
 
 ## Konsep Utama
 
-> Satu aplikasi lokal untuk membantu QA membuat report berbasis Jira dan mengubah catatan bug menjadi format yang siap digunakan dengan bantuan AI.
+> Satu aplikasi lokal untuk membantu QA menyusun QA Progress Report berbasis Jira dan mengubah catatan bug menjadi bug description yang siap dipaste ke Jira dengan bantuan AI.
 
 ---
 
@@ -123,7 +119,7 @@ AI membantu mengubah catatan tersebut menjadi bug description yang lebih terstru
 
 ## Solution 3 — Local Productivity Workflow
 
-Draft dan history pekerjaan disimpan secara lokal.
+Draft pekerjaan disimpan secara lokal.
 
 Aplikasi tidak membutuhkan server khusus milik QA Toolkit.
 
@@ -185,15 +181,13 @@ QA engineer tetap bertanggung jawab terhadap:
 
 # 6. Application Scope
 
-# Module 1 — Jira-connected QA Report Builder
+## Module 1 — Jira-connected QA Report Builder
 
-## Tujuan
+### Tujuan
 
 Membantu QA menyusun **QA Progress Report untuk project** dengan mengisi form dan mengambil data pendukung dari Jira.
 
----
-
-## Input
+### Input
 
 - Informasi project
 - Informasi progress
@@ -201,9 +195,7 @@ Membantu QA menyusun **QA Progress Report untuk project** dengan mengisi form da
 - Jira Filter URL
 - Rich text content
 
----
-
-## Jira Integration
+### Jira Integration
 
 Jira Filter URL digunakan sebagai sumber data.
 
@@ -217,9 +209,7 @@ Contohnya dapat mencakup:
 - Status issue
 - Informasi issue berdasarkan filter
 
----
-
-## Report Workflow
+### Report Workflow
 
 ```text
 User mengisi form
@@ -240,9 +230,7 @@ Live Preview
 QA Progress Report
 ```
 
----
-
-## Auto Save
+### Auto Save
 
 Input report disimpan secara otomatis ketika user mengetik.
 
@@ -265,9 +253,7 @@ Auto-save tidak berarti setiap keystroke langsung melakukan operasi database.
 
 Implementasi akan menggunakan mekanisme debounce agar operasi penyimpanan tidak dilakukan terlalu sering.
 
----
-
-## Output
+### Output
 
 > QA Progress Report untuk project yang tersusun rapi dan siap digunakan.
 
@@ -275,15 +261,13 @@ Output dapat dicopy untuk digunakan dalam email atau media reporting yang dibutu
 
 ---
 
-# Module 2 — AI Bug Report Formatter
+## Module 2 — AI Bug Report Formatter
 
-## Tujuan
+### Tujuan
 
 Mengubah catatan bug mentah menjadi **bug description yang terstruktur dan siap dipaste ke Jira**.
 
----
-
-## Input
+### Input
 
 Input tidak harus berupa kalimat yang sempurna.
 
@@ -305,9 +289,7 @@ sometimes blank page
 tested chrome edge
 ```
 
----
-
-## Processing Flow
+### Processing Flow
 
 ```text
 Raw Bug Notes
@@ -328,9 +310,7 @@ Review by QA
 Copy to Jira
 ```
 
----
-
-## Output
+### Output
 
 Output berupa **bug description yang sudah disusun dan diformat sehingga siap dipaste ke Jira**.
 
@@ -472,9 +452,7 @@ TinyMCE digunakan sebagai **rich text editor** untuk memberikan kemampuan format
 
 TinyMCE tidak digunakan sebagai storage atau backend aplikasi.
 
----
-
-## License & Cost Consideration
+### License & Cost Consideration
 
 TinyMCE memiliki opsi open-source/self-hosted serta produk dan fitur tambahan yang memiliki lisensi berbeda.
 
@@ -513,14 +491,9 @@ IndexedDB digunakan sebagai local database untuk menyimpan data non-rahasia.
 
 ### Mengapa IndexedDB?
 
-QA Toolkit memiliki beberapa jenis data:
+QA Toolkit membutuhkan penyimpanan untuk draft pekerjaan.
 
-- Draft report
-- Draft bug
-- History
-- Application settings
-
-Karena terdapat beberapa jenis data dan kemungkinan jumlah history yang terus bertambah, IndexedDB lebih sesuai dibandingkan `localStorage`.
+Karena draft dapat memiliki data yang lebih kompleks dibandingkan sekadar key-value sederhana, IndexedDB lebih sesuai dibandingkan `localStorage`.
 
 ### Dibandingkan localStorage
 
@@ -529,8 +502,8 @@ IndexedDB memiliki beberapa keuntungan:
 - Mendukung data yang lebih besar
 - Mendukung struktur data yang lebih kompleks
 - Asynchronous
-- Cocok untuk penyimpanan banyak record
-- Cocok untuk draft dan history
+- Cocok untuk penyimpanan record
+- Cocok untuk draft pekerjaan
 - Tersedia secara native pada browser/Electron
 
 Secara sederhana:
@@ -543,47 +516,33 @@ localStorage
 
 IndexedDB
     |
-    +-- Cocok untuk local application database
-    +-- Draft
-    +-- History
-    +-- Settings
+    +-- Cocok untuk local application data
+    +-- Report Draft
+    +-- Bug Draft
 ```
 
 ---
 
 # 12. IndexedDB Structure
 
-Struktur awal database:
+QA Toolkit menggunakan IndexedDB untuk menyimpan draft pekerjaan secara lokal.
+
+Struktur awal:
 
 ```text
 QA Toolkit Database
 
 ├── report_drafts
-├── bug_drafts
-├── report_history
-├── bug_history
-└── app_settings
+└── bug_drafts
 ```
 
 ## report_drafts
 
-Menyimpan draft QA Progress Report.
+Menyimpan draft QA Progress Report yang sedang dikerjakan.
 
 ## bug_drafts
 
 Menyimpan input bug yang sedang dikerjakan.
-
-## report_history
-
-Menyimpan history report yang sudah dibuat.
-
-## bug_history
-
-Menyimpan history bug report yang sudah diproses.
-
-## app_settings
-
-Menyimpan konfigurasi aplikasi yang bukan credential sensitif.
 
 ---
 
@@ -604,18 +563,15 @@ disimpan menggunakan:
 
 Pada Windows, target implementasinya adalah mekanisme secure credential storage seperti Windows Credential Manager.
 
----
-
-## Mengapa OS Credential Storage?
+### Mengapa OS Credential Storage?
 
 Credential berbeda dengan data aplikasi biasa.
 
 IndexedDB digunakan untuk:
 
 ```text
-Draft
-History
-Settings
+Report Draft
+Bug Draft
 ```
 
 Sedangkan credential disimpan terpisah:
@@ -635,9 +591,7 @@ OS Credential Storage
 - Credential tidak perlu masuk ke file backup
 - Credential dapat dikelola secara terpisah dari data aplikasi
 
----
-
-## Credential Flow
+### Credential Flow
 
 ```text
 User memasukkan token
@@ -715,7 +669,7 @@ Implementasi akan menggunakan mekanisme debounce agar operasi penyimpanan tidak 
 
 # 15. Backup & Restore
 
-QA Toolkit direncanakan memiliki fitur export dan import untuk data lokal.
+QA Toolkit direncanakan memiliki fitur export dan import untuk draft yang tersimpan secara lokal.
 
 ## Export
 
@@ -724,11 +678,8 @@ Contoh:
 ```text
 backup.json
 
-✓ Report Drafts
+✓ QA Progress Report Drafts
 ✓ Bug Drafts
-✓ Report History
-✓ Bug History
-✓ Application Settings
 
 ✗ API Tokens
 ```
@@ -737,24 +688,7 @@ backup.json
 
 Credential memiliki perlakuan keamanan yang berbeda dari data aplikasi.
 
-Jika backup dipindahkan ke PC lain:
-
-```text
-PC A
- |
- +-- Application Data
- +-- API Token
-```
-
-Setelah export:
-
-```text
-backup.json
- |
- +-- Application Data
- |
- └-- No API Token
-```
+Data draft dapat dipindahkan ke PC lain, sedangkan API token tetap disimpan secara terpisah menggunakan OS Credential Storage.
 
 Pada PC baru, user perlu memasukkan credential kembali.
 
@@ -984,7 +918,7 @@ Target MVP:
 - IndexedDB local storage
 - Auto-save
 - OS Credential Storage
-- Export/import local data
+- Export/import draft
 
 ---
 
@@ -1020,7 +954,6 @@ Membangun fondasi penyimpanan lokal.
 - Database structure
 - Auto-save
 - Draft recovery
-- History
 - Application settings
 
 ---
@@ -1130,7 +1063,6 @@ dengan tetap melakukan review sebelum digunakan.
 ## Data Safety
 
 - Draft tersimpan secara lokal
-- History tersimpan secara lokal
 - Token tidak disimpan di IndexedDB
 - Token tidak masuk backup
 - Credential dikelola melalui OS Credential Storage
@@ -1203,3 +1135,11 @@ Open WebUI API
 ## Tujuan Akhir
 
 > Membantu QA engineer menyusun QA Progress Report dengan lebih cepat dan mengubah catatan bug menjadi bug description yang siap dipaste ke Jira, dengan memanfaatkan AI untuk mengurangi pekerjaan manual yang berulang.
+
+---
+
+# 27. Final Principle
+
+> AI should assist the QA workflow, not replace QA judgment.
+
+QA Toolkit menempatkan AI sebagai assistant dalam proses transformasi informasi, sementara QA engineer tetap menjadi pihak yang melakukan review, validasi, dan mengambil keputusan akhir.
