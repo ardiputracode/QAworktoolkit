@@ -1,0 +1,27 @@
+{
+  "name": "qaworktoolkit",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/main/main.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ardiputracode/QAworktoolkit.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ardiputracode/QAworktoolkit/issues"
+  },
+  "homepage": "https://github.com/ardiputracode/QAworktoolkit#readme",
+  "devDependencies": {
+    "electron": "^30.0.0"
+  }
+}

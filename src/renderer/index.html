@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporter Content Generator</title>
+</head>
+<body>
+
+    <div id="app-container" class="app-container">
+
+        <!-- HEADER SECTION -->
+        <header id="header-container" class="header-container">
+            <div id="branding-container" class="branding-container">
+                <h1>Reporter Generator</h1>
+            </div>
+            <div id="navigation-container" class="navigation-container">
+                <nav>
+                    <ul>
+                        <li><a href="#page-home">Home</a></li>
+                        <li><a href="#page-report-builder">Report Builder</a></li>
+                        <li><a href="#page-bug-report-formatter">Bug Report Formatter</a></li>
+                        <li><a href="#page-setting">Setting</a></li>
+                        <li><a href="#page-about">About</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT SECTION -->
+        <main id="main-container" class="main-container">
+
+            <!-- PAGE: HOME -->
+            <section id="page-home" class="page-container page-home">
+                <h2>Home</h2>
+                <p>Work in Progress</p>
+            </section>
+
+            <!-- PAGE: REPORT BUILDER -->
+            <section id="page-report-builder" class="page-container page-report-builder">
+                <h2>Report Builder</h2>
+
+                <!-- Utility Section -->
+                <div id="utility-section" class="utility-section">
+                    <button id="export-report-draft" type="button">Export Report Draft</button>
+                    <button id="import-report-draft" type="button">Import Report Draft</button>
+                </div>
+
+                <!-- Input Section -->
+                <div id="input-section" class="input-section">
+                    <form>
+                        <!-- General Information Group -->
+                        <fieldset id="general-information" class="input-group">
+                            <legend>General Information</legend>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="report-date">Report Date</label>
+                                    <button id="report-date-info" class="input-info-button" type="button" aria-label="Additional information for Report Date">Info</button>
+                                </div>
+                                <input type="date" id="report-date" name="report-date">
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="project-name">Project Name</label>
+                                    <button id="project-name-info" class="input-info-button" type="button" aria-label="Additional information for Project Name">Info</button>
+                                </div>
+                                <select id="project-name" name="project-name">
+                                    <option value="">Select Project</option>
+                                </select>
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="project-type">Project Type</label>
+                                    <button id="project-type-info" class="input-info-button" type="button" aria-label="Additional information for Project Type">Info</button>
+                                </div>
+                                <select id="project-type" name="project-type">
+                                    <option value="">Select Type</option>
+                                </select>
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="upd-number">Update Number</label>
+                                    <button id="upd-number-info" class="input-info-button" type="button" aria-label="Additional information for Update Number">Info</button>
+                                </div>
+                                <input type="number" id="upd-number" name="upd-number">
+                            </div>
+                        </fieldset>
+
+                        <!-- Overview Group -->
+                        <fieldset id="overview" class="input-group">
+                            <legend>Overview</legend>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="version">Version</label>
+                                    <button id="version-info" class="input-info-button" type="button" aria-label="Additional information for Version">Info</button>
+                                </div>
+                                <input type="text" id="version" name="version">
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="build-link">Build Link</label>
+                                    <button id="build-link-info" class="input-info-button" type="button" aria-label="Additional information for Build Link">Info</button>
+                                </div>
+                                <input type="text" id="build-link" name="build-link">
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="total-issues">Total Issues</label>
+                                    <button id="total-issues-info" class="input-info-button" type="button" aria-label="Additional information for Total Issues">Info</button>
+                                </div>
+                                <input type="number" id="total-issues" name="total-issues">
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="total-issues-link">Total Issues Link</label>
+                                    <button id="total-issues-link-info" class="input-info-button" type="button" aria-label="Additional information for Total Issues Link">Info</button>
+                                </div>
+                                <input type="text" id="total-issues-link" name="total-issues-link">
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="major-issues">Major Issues</label>
+                                    <button id="major-issues-info" class="input-info-button" type="button" aria-label="Additional information for Major Issues">Info</button>
+                                </div>
+                                <input type="number" id="major-issues" name="major-issues">
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="major-issues-link">Major Issues Link</label>
+                                    <button id="major-issues-link-info" class="input-info-button" type="button" aria-label="Additional information for Major Issues Link">Info</button>
+                                </div>
+                                <input type="text" id="major-issues-link" name="major-issues-link">
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="licensed-content">Licensed Content</label>
+                                    <button id="licensed-content-info" class="input-info-button" type="button" aria-label="Additional information for Licensed Content">Info</button>
+                                </div>
+                                <select id="licensed-content" name="licensed-content">
+                                    <option value="">Select Status</option>
+                                </select>
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="licensed-note">Licensed Note</label>
+                                    <button id="licensed-note-info" class="input-info-button" type="button" aria-label="Additional information for Licensed Note">Info</button>
+                                </div>
+                                <input type="text" id="licensed-note" name="licensed-note">
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="audio-credits">Audio Credits</label>
+                                    <button id="audio-credits-info" class="input-info-button" type="button" aria-label="Additional information for Audio Credits">Info</button>
+                                </div>
+                                <select id="audio-credits" name="audio-credits">
+                                    <option value="">Select Status</option>
+                                </select>
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="audio-credits-note">Audio Credits Note</label>
+                                    <button id="audio-credits-note-info" class="input-info-button" type="button" aria-label="Additional information for Audio Credits Note">Info</button>
+                                </div>
+                                <input type="text" id="audio-credits-note" name="audio-credits-note">
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="result-status">Result Status</label>
+                                    <button id="result-status-info" class="input-info-button" type="button" aria-label="Additional information for Result Status">Info</button>
+                                </div>
+                                <select id="result-status" name="result-status">
+                                    <option value="">Select Result</option>
+                                </select>
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="result-status-note">Result Status Note</label>
+                                    <button id="result-status-note-info" class="input-info-button" type="button" aria-label="Additional information for Result Status Note">Info</button>
+                                </div>
+                                <input type="text" id="result-status-note" name="result-status-note">
+                            </div>
+                        </fieldset>
+
+                        <!-- Testers Group -->
+                        <fieldset id="testers" class="input-group">
+                            <legend>
+                                Testers
+                                <button id="testers-info" class="input-info-button" type="button" aria-label="Additional information for Testers section">Info</button>
+                            </legend>
+                            
+                            <div class="form-field">
+                                <label for="tester-1">Tester 1</label>
+                                <input type="checkbox" id="tester-1" name="tester-1">
+                            </div>
+
+                            <div class="form-field">
+                                <label for="tester-2">Tester 2</label>
+                                <input type="checkbox" id="tester-2" name="tester-2">
+                            </div>
+
+                            <div class="form-field">
+                                <label for="tester-3">Tester 3</label>
+                                <input type="checkbox" id="tester-3" name="tester-3">
+                            </div>
+
+                            <div class="form-field">
+                                <label for="tester-4">Tester 4</label>
+                                <input type="checkbox" id="tester-4" name="tester-4">
+                            </div>
+
+                            <div class="form-field">
+                                <label for="tester-5">Tester 5</label>
+                                <input type="checkbox" id="tester-5" name="tester-5">
+                            </div>
+
+                            <div class="form-field">
+                                <label for="tester-6">Tester 6</label>
+                                <input type="checkbox" id="tester-6" name="tester-6">
+                            </div>
+
+                            <div class="form-field">
+                                <label for="tester-7">Tester 7</label>
+                                <input type="checkbox" id="tester-7" name="tester-7">
+                            </div>
+
+                            <div class="form-field">
+                                <label for="tester-8">Tester 8</label>
+                                <input type="checkbox" id="tester-8" name="tester-8">
+                            </div>
+                        </fieldset>
+
+                        <!-- Report Content Group -->
+                        <fieldset id="report-content" class="input-group">
+                            <legend>Report Content</legend>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="editor-audio-highlights">Audio Highlights</label>
+                                    <button id="editor-audio-highlights-info" class="input-info-button" type="button" aria-label="Additional information for Audio Highlights">Info</button>
+                                </div>
+                                <textarea id="editor-audio-highlights" name="editor-audio-highlights"></textarea>
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="editor-general-highlights">General Highlights</label>
+                                    <button id="editor-general-highlights-info" class="input-info-button" type="button" aria-label="Additional information for General Highlights">Info</button>
+                                </div>
+                                <textarea id="editor-general-highlights" name="editor-general-highlights"></textarea>
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="editor-update-followup">Update Follow-up</label>
+                                    <button id="editor-update-followup-info" class="input-info-button" type="button" aria-label="Additional information for Update Follow-up">Info</button>
+                                </div>
+                                <textarea id="editor-update-followup" name="editor-update-followup"></textarea>
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="editor-question">Questions</label>
+                                    <button id="editor-question-info" class="input-info-button" type="button" aria-label="Additional information for Questions">Info</button>
+                                </div>
+                                <textarea id="editor-question" name="editor-question"></textarea>
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="editor-milestone">Milestones</label>
+                                    <button id="editor-milestone-info" class="input-info-button" type="button" aria-label="Additional information for Milestones">Info</button>
+                                </div>
+                                <textarea id="editor-milestone" name="editor-milestone"></textarea>
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="tvb-link">TVB Link</label>
+                                    <button id="tvb-link-info" class="input-info-button" type="button" aria-label="Additional information for TVB Link">Info</button>
+                                </div>
+                                <input type="text" id="tvb-link" name="tvb-link">
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="editor-tvb">TVB Content</label>
+                                    <button id="editor-tvb-info" class="input-info-button" type="button" aria-label="Additional information for TVB Content">Info</button>
+                                </div>
+                                <textarea id="editor-tvb" name="editor-tvb"></textarea>
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="heatmap-link">Heatmap Link</label>
+                                    <button id="heatmap-link-info" class="input-info-button" type="button" aria-label="Additional information for Heatmap Link">Info</button>
+                                </div>
+                                <input type="text" id="heatmap-link" name="heatmap-link">
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="editor-heatmap">Heatmap Content</label>
+                                    <button id="editor-heatmap-info" class="input-info-button" type="button" aria-label="Additional information for Heatmap Content">Info</button>
+                                </div>
+                                <textarea id="editor-heatmap" name="editor-heatmap"></textarea>
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="platforms-link">Platforms Link</label>
+                                    <button id="platforms-link-info" class="input-info-button" type="button" aria-label="Additional information for Platforms Link">Info</button>
+                                </div>
+                                <input type="text" id="platforms-link" name="platforms-link">
+                            </div>
+
+                            <div class="form-field">
+                                <div class="field-label-row">
+                                    <label for="editor-platforms-tracking">Platforms Tracking</label>
+                                    <button id="editor-platforms-tracking-info" class="input-info-button" type="button" aria-label="Additional information for Platforms Tracking">Info</button>
+                                </div>
+                                <textarea id="editor-platforms-tracking" name="editor-platforms-tracking"></textarea>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+
+                <!-- Output Section -->
+                <div id="output-section" class="output-section">
+                    <label for="email-preview">Email Preview</label>
+                    <button id="email-preview-info" class="output-info-button" type="button" aria-label="Preview of the report">Info</button>
+                    <textarea id="email-preview" name="email-preview" rows="10"></textarea>
+                    <button id="copy-to-clipboard" type="button">Copy to Clipboard</button>
+                </div>
+            </section>
+
+            <!-- PAGE: BUG REPORT FORMATTER -->
+            <section id="page-bug-report-formatter" class="page-container page-bug-report-formatter">
+                <h2>Bug Report Formatter</h2>
+
+              <!-- Bug Report Generator Form -->
+              <form id="bug-report-form">
+                <legend>Bug Report Generator</legend>
+
+                <!-- Issue Location -->
+                <div class="form-field">
+                  <div class="field-label-row">
+                    <label for="input-location">Issue Location</label>
+                    <button type="button" data-dialog="issue-location-help">Info</button>
+                  </div>
+                  <textarea id="input-location" name="issue_location"></textarea>
+                </div>
+
+                <!-- Issue Details -->
+                <div class="form-field">
+                  <div class="field-label-row">
+                    <label for="input-details">Issue Details</label>
+                    <button type="button" data-dialog="affected-users-help">Info</button>
+                  </div>
+                  <textarea id="input-details" name="issue_details"></textarea>
+                </div>
+
+                <!-- Issue Impact -->
+                <div class="form-field">
+                  <div class="field-label-row">
+                    <label for="input-impact">Issue Impact</label>
+                    <button type="button" data-dialog="impact-help">Info</button>
+                  </div>
+                  <textarea id="input-impact" name="issue_impact"></textarea>
+                </div>
+
+                <!-- Expected Result -->
+                <div class="form-field">
+                  <div class="field-label-row">
+                    <label for="input-expected">Expected Result</label>
+                    <button type="button" data-dialog="expected-help">Info</button>
+                  </div>
+                  <textarea id="input-expected" name="issue_expected"></textarea>
+                </div>
+
+                <!-- Steps to Reproduce -->
+                <fieldset class="form-section" data-table="steps">
+                  <legend>Steps to Reproduce</legend>
+                  <div class="form-field">
+                    <div class="field-label-row">
+                      <label>Step Description</label>
+                      <button type="button" data-dialog="steps-help">Info</button>
+                    </div>
+                    <input type="text" name="steps[]">
+                  </div>
+                </fieldset>
+
+                <!-- Additional Notes -->
+                <fieldset class="form-section" data-table="notes">
+                  <legend>Additional Notes</legend>
+                  <div class="form-field">
+                    <div class="field-label-row">
+                      <label>Note Detail</label>
+                      <button type="button" data-dialog="notes-help">Info</button>
+                    </div>
+                    <input type="text" name="notes[]">
+                  </div>
+                </fieldset>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                  <button type="button">Generate Report</button>
+                  <button type="button">Reset Form</button>
+                </div>
+              </form>
+
+              <!-- Generated Output -->
+              <div id="section-output" class="output-container">
+                <div class="form-field">
+                  <div class="field-label-row">
+                    <label for="output-display">Generated Report Output</label>
+                  </div>
+                  <textarea id="output-display" readonly></textarea>
+                </div>
+                <button type="button">Copy to Clipboard</button>
+              </div>
+
+            </section>
+
+            <!-- PAGE: SETTING -->
+            <section id="page-setting" class="page-container page-setting">
+              <h2>Setting</h2>
+              <form id="form-settings">
+                <!-- Jira Cloud API Configuration -->
+                <fieldset>
+                  <legend>Jira Cloud API Configuration</legend>
+
+                  <div class="form-field">
+                    <div class="field-label-row">
+                      <label for="jira-domain">Jira domain</label>
+                      <button type="button" id="btn-info-jira-domain" title="Information">Info</button>
+                    </div>
+                    <input type="url" id="jira-domain" name="jira_domain">
+                  </div>
+
+                  <div class="form-field">
+                    <div class="field-label-row">
+                      <label for="jira-email">Jira email</label>
+                      <button type="button" id="btn-info-jira-email" title="Information">Info</button>
+                    </div>
+                    <input type="email" id="jira-email" name="jira_email">
+                  </div>
+
+                  <div class="form-field">
+                    <div class="field-label-row">
+                      <label for="jira-api-token">Jira API token</label>
+                      <button type="button" id="btn-info-jira-api-token" title="Information">Info</button>
+                    </div>
+                    <input type="password" id="jira-api-token" name="jira_api_token">
+                  </div>
+
+                  <div class="form-field">
+                    <button type="button" id="btn-test-jira">Test Jira Connection</button>
+                  </div>
+
+                  <div class="form-field">
+                    <div class="field-label-row">
+                      <label for="jira-status">Jira status</label>
+                    </div>
+                    <input type="text" id="jira-status" name="jira_status" readonly>
+                  </div>
+
+                  <div class="form-field">
+                    <div class="field-label-row">
+                      <label for="jira-connected-user">Connected Jira user</label>
+                    </div>
+                    <input type="text" id="jira-connected-user" name="jira_connected_user" readonly>
+                  </div>
+
+                  <div class="form-actions">
+                    <button type="submit">Save Jira Configuration</button>
+                    <button type="reset">Reset Jira Configuration</button>
+                  </div>
+                </fieldset>
+
+                <!-- Open WebUI API Configuration -->
+                <fieldset>
+                  <legend>Open WebUI API Configuration</legend>
+
+                  <div class="form-field">
+                    <div class="field-label-row">
+                      <label for="openwebui-url">Open WebUI URL</label>
+                      <button type="button" id="btn-info-openwebui-url" title="Information">Info</button>
+                    </div>
+                    <input type="url" id="openwebui-url" name="openwebui_url">
+                  </div>
+
+                  <div class="form-field">
+                    <div class="field-label-row">
+                      <label for="openwebui-api-key">Open WebUI API key</label>
+                      <button type="button" id="btn-info-openwebui-api-key" title="Information">Info</button>
+                    </div>
+                    <input type="password" id="openwebui-api-key" name="openwebui_api_key">
+                  </div>
+
+                  <div class="form-field">
+                    <button type="button" id="btn-test-openwebui">Test Open WebUI Connection</button>
+                  </div>
+
+                  <div class="form-field">
+                    <div class="field-label-row">
+                      <label for="openwebui-status">Open WebUI status</label>
+                    </div>
+                    <input type="text" id="openwebui-status" name="openwebui_status" readonly>
+                  </div>
+
+                  <div class="form-actions">
+                    <button type="submit">Save Open WebUI Configuration</button>
+                    <button type="reset">Reset Open WebUI Configuration</button>
+                  </div>
+                </fieldset>
+              </form>
+            </section>
+
+            <!-- PAGE: ABOUT -->
+            <section id="page-about" class="page-container page-about">
+                <h2>About</h2>
+                <p>Work in Progress</p>
+            </section>
+
+        </main>
+
+        <!-- FOOTER SECTION -->
+        <footer id="footer-container" class="footer-container">
+            <div class="footer-content">
+                <p>&copy; 2023 Reporter Generator Application</p>
+            </div>
+        </footer>
+
+    </div>
+
+</body>
+</html>
