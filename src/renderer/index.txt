@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="id">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -53,31 +53,27 @@
         <h1 class="page-title" id="page-report-builder-title">Report Builder</h1>
 
         <!-- Sub-section: Toolbar -->
-        <fieldset class="card">
-          <legend>Report Builder Actions</legend>
+        <div class="toolbar" role="group" aria-label="Report Builder Actions">
+          <button
+            type="button"
+            class="btn"
+            data-action="export-report"
+            data-status-target="report-builder-status"
+          >
+            Export Report Draft
+          </button>
 
-          <div class="toolbar">
-            <button
-              type="button"
-              class="btn"
-              data-action="export-report"
-              data-status-target="report-builder-status"
-            >
-              Export Report Draft
-            </button>
+          <button
+            type="button"
+            class="btn"
+            data-action="import-report"
+            data-status-target="report-builder-status"
+          >
+            Import Report Draft
+          </button>
 
-            <button
-              type="button"
-              class="btn"
-              data-action="import-report"
-              data-status-target="report-builder-status"
-            >
-              Import Report Draft
-            </button>
-
-            <input type="file" id="report-import-file" accept="application/json,.json" hidden />
-          </div>
-        </fieldset>
+          <input type="file" id="report-import-file" accept="application/json,.json" hidden />
+        </div>
 
         <div id="report-builder-status" class="status" role="status" aria-live="polite"></div>
 
@@ -347,7 +343,7 @@
                     Info
                   </button>
                 </div>
-                <input type="text" class="form-input" id="licensed-note" name="licensedNote" />
+                <textarea class="form-textarea" id="licensed-note" name="licensedNote"></textarea>
               </div>
 
               <div class="form-field">
@@ -388,12 +384,11 @@
                     Info
                   </button>
                 </div>
-                <input
-                  type="text"
-                  class="form-input"
+                <textarea
+                  class="form-textarea"
                   id="audio-credits-note"
                   name="audioCreditsNote"
-                />
+                ></textarea>
               </div>
 
               <div class="form-field">
@@ -435,12 +430,11 @@
                     Info
                   </button>
                 </div>
-                <input
-                  type="text"
-                  class="form-input"
+                <textarea
+                  class="form-textarea"
                   id="result-status-note"
                   name="resultStatusNote"
-                />
+                ></textarea>
               </div>
             </div>
           </fieldset>
@@ -899,49 +893,27 @@
               </div>
 
               <div class="form-field">
-                <label class="form-label" for="issue-observer">
-                  Who Can Notice the Issue?
-                  <span class="required-mark" aria-hidden="true"> * </span>
-                </label>
-
-                <select
-                  class="form-select"
-                  id="issue-observer"
-                  name="issueObserver"
-                  required
-                  aria-required="true"
-                >
-                  <option value="" selected disabled>Select one</option>
-                  <option value="player">Player</option>
-                  <option value="tester">Tester</option>
-                  <option value="player-tester">Player / Tester</option>
-                </select>
-              </div>
-
-              <div class="form-field">
                 <div class="form-label-row">
-                  <label class="form-label" for="issue-description">
-                    What Is the Issue
+                  <label class="form-label" for="affected-users-description">
+                    Affected Users & Issue Description
                     <span class="required-mark" aria-hidden="true"> * </span>
                   </label>
-
                   <button
                     type="button"
                     class="btn btn--info btn--small"
                     data-action="open-info"
                     data-dialog-target="info-dialog"
-                    data-info-key="issueDescription"
+                    data-info-key="affectedUsersDescription"
                     aria-haspopup="dialog"
-                    aria-label="Information for What Is the Issue"
+                    aria-label="Information for Affected Users and Issue Description"
                   >
                     Info
                   </button>
                 </div>
-
                 <textarea
                   class="form-textarea"
-                  id="issue-description"
-                  name="issueDescription"
+                  id="affected-users-description"
+                  name="affectedUsersDescription"
                   required
                   aria-required="true"
                 ></textarea>
@@ -1189,9 +1161,8 @@
           <textarea
             id="bug-report-output"
             class="form-textarea report-preview"
+            tabindex="0"
             readonly
-            aria-live="polite"
-            rows="10"
             placeholder="Generated report will appear here..."
           ></textarea>
           <div class="form-actions">
@@ -1288,7 +1259,7 @@
                   type="password"
                   id="jira-api-token"
                   name="jiraApiToken"
-                  autocomplete="new-password"
+                  autocomplete="off"
                 />
               </div>
             </div>
@@ -1386,7 +1357,7 @@
                   type="password"
                   id="openwebui-api-key"
                   name="openWebUiApiKey"
-                  autocomplete="new-password"
+                  autocomplete="off"
                 />
               </div>
             </div>

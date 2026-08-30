@@ -20,6 +20,9 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
-# Editor
-.vscode/
+# Editor - VS Code / VSCodium
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
 .idea/
