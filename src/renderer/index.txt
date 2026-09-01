@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="id">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -30,6 +30,23 @@
         <a href="#page-settings" class="nav-link" data-page-link> Settings </a>
         <a href="#page-about" class="nav-link" data-page-link> About </a>
       </nav>
+      <button
+        type="button"
+        id="theme-toggle"
+        class="theme-switch"
+        aria-label="Toggle Dark/Light Mode"
+      >
+        <span class="theme-stars" aria-hidden="true">
+          <span class="star star--1">✦</span>
+          <span class="star star--2">•</span>
+          <span class="star star--3">✧</span>
+        </span>
+
+        <span class="switch-thumb">
+          <span class="sun-glow" aria-hidden="true"></span>
+          <span id="theme-icon">🌙</span>
+        </span>
+      </button>
     </header>
 
     <!-- ======================= MAIN CONTENT ======================= -->
@@ -53,27 +70,43 @@
         <h1 class="page-title" id="page-report-builder-title">Report Builder</h1>
 
         <!-- Sub-section: Toolbar -->
-        <div class="toolbar" role="group" aria-label="Report Builder Actions">
-          <button
-            type="button"
-            class="btn"
-            data-action="export-report"
-            data-status-target="report-builder-status"
-          >
-            Export Report Draft
-          </button>
+        <fieldset class="form-section">
+          <legend>
+            <span>Report Builder Actions</span>
 
-          <button
-            type="button"
-            class="btn"
-            data-action="import-report"
-            data-status-target="report-builder-status"
-          >
-            Import Report Draft
-          </button>
+            <button
+              type="button"
+              class="btn btn--info btn--small"
+              data-action="open-info"
+              data-dialog-target="info-dialog"
+              data-info-key="reportBuilderActions"
+              aria-haspopup="dialog"
+              aria-label="Information for Report Builder Actions"
+            ></button>
+          </legend>
 
-          <input type="file" id="report-import-file" accept="application/json,.json" hidden />
-        </div>
+          <div class="toolbar">
+            <button
+              type="button"
+              class="btn"
+              data-action="export-report"
+              data-status-target="report-builder-status"
+            >
+              Export Report Draft
+            </button>
+
+            <button
+              type="button"
+              class="btn"
+              data-action="import-report"
+              data-status-target="report-builder-status"
+            >
+              Import Report Draft
+            </button>
+
+            <input type="file" id="report-import-file" accept="application/json,.json" hidden />
+          </div>
+        </fieldset>
 
         <div id="report-builder-status" class="status" role="status" aria-live="polite"></div>
 
@@ -95,9 +128,7 @@
                     data-info-key="reportDate"
                     aria-haspopup="dialog"
                     aria-label="Information for Report Date"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <input class="form-input" type="date" id="report-date" name="reportDate" />
               </div>
@@ -113,9 +144,7 @@
                     data-info-key="projectName"
                     aria-haspopup="dialog"
                     aria-label="Information for Project Name"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <select class="form-select" id="project-name" name="projectName">
                   <option value="">Select Project</option>
@@ -133,9 +162,7 @@
                     data-info-key="projectType"
                     aria-haspopup="dialog"
                     aria-label="Information for Project Type"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <select class="form-select" id="project-type" name="projectType">
                   <option value="">Select Type</option>
@@ -153,9 +180,7 @@
                     data-info-key="updateNumber"
                     aria-haspopup="dialog"
                     aria-label="Information for Update Number"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <input class="form-input" type="text" id="update-number" name="updateNumber" />
               </div>
@@ -178,9 +203,7 @@
                     data-info-key="version"
                     aria-haspopup="dialog"
                     aria-label="Information for Version"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <input class="form-input" type="text" id="version" name="version" />
               </div>
@@ -196,9 +219,7 @@
                     data-info-key="buildLink"
                     aria-haspopup="dialog"
                     aria-label="Information for Build Link"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <input
                   class="form-input"
@@ -220,9 +241,7 @@
                     data-info-key="totalIssues"
                     aria-haspopup="dialog"
                     aria-label="Information for Total Issues"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <input
                   class="form-input"
@@ -244,9 +263,7 @@
                     data-info-key="totalIssuesLink"
                     aria-haspopup="dialog"
                     aria-label="Information for Total Issues Link"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <input
                   class="form-input"
@@ -268,9 +285,7 @@
                     data-info-key="majorIssues"
                     aria-haspopup="dialog"
                     aria-label="Information for Major Issues"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <input
                   class="form-input"
@@ -292,9 +307,7 @@
                     data-info-key="majorIssuesLink"
                     aria-haspopup="dialog"
                     aria-label="Information for Major Issues Link"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <input
                   class="form-input"
@@ -316,9 +329,7 @@
                     data-info-key="licensedContent"
                     aria-haspopup="dialog"
                     aria-label="Information for Licensed Content"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <select class="form-select" id="licensed-content" name="licensedContent">
                   <option value="">Select Status</option>
@@ -339,11 +350,9 @@
                     data-info-key="licensedNote"
                     aria-haspopup="dialog"
                     aria-label="Information for Licensed Note"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
-                <textarea class="form-textarea" id="licensed-note" name="licensedNote"></textarea>
+                <input type="text" class="form-input" id="licensed-note" name="licensedNote" />
               </div>
 
               <div class="form-field">
@@ -357,9 +366,7 @@
                     data-info-key="audioCredits"
                     aria-haspopup="dialog"
                     aria-label="Information for Audio Credits"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <select class="form-select" id="audio-credits" name="audioCredits">
                   <option value="">Select Status</option>
@@ -380,15 +387,14 @@
                     data-info-key="audioCreditsNote"
                     aria-haspopup="dialog"
                     aria-label="Information for Audio Credits Note"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
-                <textarea
-                  class="form-textarea"
+                <input
+                  type="text"
+                  class="form-input"
                   id="audio-credits-note"
                   name="audioCreditsNote"
-                ></textarea>
+                />
               </div>
 
               <div class="form-field">
@@ -402,9 +408,7 @@
                     data-info-key="resultStatus"
                     aria-haspopup="dialog"
                     aria-label="Information for Result Status"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <select class="form-select" id="result-status" name="resultStatus">
                   <option value="">Select Result</option>
@@ -426,24 +430,22 @@
                     data-info-key="resultStatusNote"
                     aria-haspopup="dialog"
                     aria-label="Information for Result Status Note"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
-                <textarea
-                  class="form-textarea"
+                <input
+                  type="text"
+                  class="form-input"
                   id="result-status-note"
                   name="resultStatusNote"
-                ></textarea>
+                />
               </div>
             </div>
           </fieldset>
 
           <!-- Sub-section: Testers -->
           <fieldset class="form-section">
-            <legend>Testers</legend>
-
-            <div class="form-section-toolbar">
+            <legend>
+              <span>Testers</span>
               <button
                 type="button"
                 class="btn btn--info btn--small"
@@ -452,51 +454,49 @@
                 data-info-key="testers"
                 aria-haspopup="dialog"
                 aria-label="Information for Testers"
-              >
-                Info
-              </button>
-            </div>
+              ></button>
+            </legend>
 
-            <div class="form-grid form-grid--4">
-              <div class="form-field">
-                <label class="form-label" for="tester-1">Tester 1</label>
-                <input class="form-input" type="text" id="tester-1" name="tester1" />
-              </div>
+            <div class="checkbox-grid">
+              <label class="field-item">
+                <input type="checkbox" name="testers" value="tester-1" />
+                <span>Tester 1</span>
+              </label>
 
-              <div class="form-field">
-                <label class="form-label" for="tester-2">Tester 2</label>
-                <input class="form-input" type="text" id="tester-2" name="tester2" />
-              </div>
+              <label class="field-item">
+                <input type="checkbox" name="testers" value="tester-2" />
+                <span>Tester 2</span>
+              </label>
 
-              <div class="form-field">
-                <label class="form-label" for="tester-3">Tester 3</label>
-                <input class="form-input" type="text" id="tester-3" name="tester3" />
-              </div>
+              <label class="field-item">
+                <input type="checkbox" name="testers" value="tester-3" />
+                <span>Tester 3</span>
+              </label>
 
-              <div class="form-field">
-                <label class="form-label" for="tester-4">Tester 4</label>
-                <input class="form-input" type="text" id="tester-4" name="tester4" />
-              </div>
+              <label class="field-item">
+                <input type="checkbox" name="testers" value="tester-4" />
+                <span>Tester 4</span>
+              </label>
 
-              <div class="form-field">
-                <label class="form-label" for="tester-5">Tester 5</label>
-                <input class="form-input" type="text" id="tester-5" name="tester5" />
-              </div>
+              <label class="field-item">
+                <input type="checkbox" name="testers" value="tester-5" />
+                <span>Tester 5</span>
+              </label>
 
-              <div class="form-field">
-                <label class="form-label" for="tester-6">Tester 6</label>
-                <input class="form-input" type="text" id="tester-6" name="tester6" />
-              </div>
+              <label class="field-item">
+                <input type="checkbox" name="testers" value="tester-6" />
+                <span>Tester 6</span>
+              </label>
 
-              <div class="form-field">
-                <label class="form-label" for="tester-7">Tester 7</label>
-                <input class="form-input" type="text" id="tester-7" name="tester7" />
-              </div>
+              <label class="field-item">
+                <input type="checkbox" name="testers" value="tester-7" />
+                <span>Tester 7</span>
+              </label>
 
-              <div class="form-field">
-                <label class="form-label" for="tester-8">Tester 8</label>
-                <input class="form-input" type="text" id="tester-8" name="tester8" />
-              </div>
+              <label class="field-item">
+                <input type="checkbox" name="testers" value="tester-8" />
+                <span>Tester 8</span>
+              </label>
             </div>
           </fieldset>
 
@@ -504,7 +504,7 @@
           <fieldset class="form-section">
             <legend>Report Content</legend>
 
-            <div class="form-grid form-grid--2">
+            <div class="form-grid">
               <div class="form-field">
                 <div class="form-label-row">
                   <label class="form-label" for="audio-highlights">Audio Highlights</label>
@@ -516,9 +516,7 @@
                     data-info-key="audioHighlights"
                     aria-haspopup="dialog"
                     aria-label="Information for Audio Highlights"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <textarea
                   class="form-textarea"
@@ -538,9 +536,7 @@
                     data-info-key="generalHighlights"
                     aria-haspopup="dialog"
                     aria-label="Information for General Highlights"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <textarea
                   class="form-textarea"
@@ -560,9 +556,7 @@
                     data-info-key="updateFollowUp"
                     aria-haspopup="dialog"
                     aria-label="Information for Update Follow-up"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <textarea
                   class="form-textarea"
@@ -582,9 +576,7 @@
                     data-info-key="questions"
                     aria-haspopup="dialog"
                     aria-label="Information for Questions"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <textarea class="form-textarea" id="questions" name="questions"></textarea>
               </div>
@@ -600,9 +592,7 @@
                     data-info-key="milestones"
                     aria-haspopup="dialog"
                     aria-label="Information for Milestones"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <textarea class="form-textarea" id="milestones" name="milestones"></textarea>
               </div>
@@ -618,9 +608,7 @@
                     data-info-key="tvbLink"
                     aria-haspopup="dialog"
                     aria-label="Information for TVB Link"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <input
                   class="form-input"
@@ -642,9 +630,7 @@
                     data-info-key="tvbContent"
                     aria-haspopup="dialog"
                     aria-label="Information for TVB Content"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <textarea class="form-textarea" id="tvb-content" name="tvbContent"></textarea>
               </div>
@@ -660,9 +646,7 @@
                     data-info-key="heatmapLink"
                     aria-haspopup="dialog"
                     aria-label="Information for Heatmap Link"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <input
                   class="form-input"
@@ -684,9 +668,7 @@
                     data-info-key="heatmapContent"
                     aria-haspopup="dialog"
                     aria-label="Information for Heatmap Content"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <textarea
                   class="form-textarea"
@@ -706,9 +688,7 @@
                     data-info-key="platformsLink"
                     aria-haspopup="dialog"
                     aria-label="Information for Platforms Link"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <input
                   class="form-input"
@@ -730,9 +710,7 @@
                     data-info-key="platformsTracking"
                     aria-haspopup="dialog"
                     aria-label="Information for Platforms Tracking"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <textarea
                   class="form-textarea"
@@ -746,7 +724,7 @@
           <div class="form-actions">
             <button
               type="button"
-              class="btn"
+              class="btn btn--primary"
               data-action="clear-form"
               data-form-id="report-builder-form"
             >
@@ -759,6 +737,16 @@
         <section class="card" aria-labelledby="subject-preview-title">
           <div class="section-header">
             <h2 id="subject-preview-title">Subject Previews</h2>
+
+            <button
+              type="button"
+              class="btn btn--info btn--small"
+              data-action="open-info"
+              data-dialog-target="info-dialog"
+              data-info-key="subjectPreviews"
+              aria-haspopup="dialog"
+              aria-label="Information for Subject Previews"
+            ></button>
           </div>
 
           <div class="form-grid">
@@ -823,9 +811,7 @@
               data-info-key="emailPreview"
               aria-haspopup="dialog"
               aria-label="Information for Email Preview"
-            >
-              Info
-            </button>
+            ></button>
           </div>
 
           <div id="report-preview" class="report-preview" tabindex="0">
@@ -878,9 +864,7 @@
                     data-info-key="issueLocation"
                     aria-haspopup="dialog"
                     aria-label="Information for Issue Location"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <input
                   class="form-input"
@@ -894,26 +878,58 @@
 
               <div class="form-field">
                 <div class="form-label-row">
-                  <label class="form-label" for="affected-users-description">
-                    Affected Users & Issue Description
+                  <label class="form-label" for="issue-observer">
+                    Who Can Notice the Issue?
                     <span class="required-mark" aria-hidden="true"> * </span>
                   </label>
+
                   <button
                     type="button"
                     class="btn btn--info btn--small"
                     data-action="open-info"
                     data-dialog-target="info-dialog"
-                    data-info-key="affectedUsersDescription"
+                    data-info-key="issueObserver"
                     aria-haspopup="dialog"
-                    aria-label="Information for Affected Users and Issue Description"
-                  >
-                    Info
-                  </button>
+                    aria-label="Information for Who Can Notice the Issue"
+                  ></button>
                 </div>
+
+                <select
+                  class="form-select"
+                  id="issue-observer"
+                  name="issueObserver"
+                  required
+                  aria-required="true"
+                >
+                  <option value="" selected disabled>Select one</option>
+                  <option value="player">Player</option>
+                  <option value="tester">Tester</option>
+                  <option value="player-tester">Player / Tester</option>
+                </select>
+              </div>
+
+              <div class="form-field">
+                <div class="form-label-row">
+                  <label class="form-label" for="issue-description">
+                    What Is the Issue
+                    <span class="required-mark" aria-hidden="true"> * </span>
+                  </label>
+
+                  <button
+                    type="button"
+                    class="btn btn--info btn--small"
+                    data-action="open-info"
+                    data-dialog-target="info-dialog"
+                    data-info-key="issueDescription"
+                    aria-haspopup="dialog"
+                    aria-label="Information for What Is the Issue"
+                  ></button>
+                </div>
+
                 <textarea
                   class="form-textarea"
-                  id="affected-users-description"
-                  name="affectedUsersDescription"
+                  id="issue-description"
+                  name="issueDescription"
                   required
                   aria-required="true"
                 ></textarea>
@@ -933,9 +949,7 @@
                     data-info-key="impact"
                     aria-haspopup="dialog"
                     aria-label="Information for Impact of the Issue"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <textarea
                   class="form-textarea"
@@ -960,9 +974,7 @@
                     data-info-key="expectedResult"
                     aria-haspopup="dialog"
                     aria-label="Information for Expected Result"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <textarea
                   class="form-textarea"
@@ -982,22 +994,20 @@
               <span class="required-mark" aria-hidden="true"> * </span>
             </legend>
 
-            <div class="form-section-toolbar">
-              <button
-                type="button"
-                class="btn btn--info btn--small"
-                data-action="open-info"
-                data-dialog-target="info-dialog"
-                data-info-key="stepsToReproduce"
-                aria-haspopup="dialog"
-                aria-label="Information for Steps to Reproduce"
-              >
-                Info
-              </button>
-            </div>
+            <div class="list-header">
+              <span class="step-description">
+                Step Description
 
-            <div class="list-header" aria-hidden="true">
-              <span>Step Description</span>
+                <button
+                  type="button"
+                  class="btn btn--info btn--small"
+                  data-action="open-info"
+                  data-dialog-target="info-dialog"
+                  data-info-key="stepsToReproduce"
+                  aria-haspopup="dialog"
+                  aria-label="Information for Steps to Reproduce"
+                ></button>
+              </span>
               <span>Action</span>
             </div>
 
@@ -1068,22 +1078,20 @@
           <fieldset class="form-section">
             <legend>Additional Notes</legend>
 
-            <div class="form-section-toolbar">
-              <button
-                type="button"
-                class="btn btn--info btn--small"
-                data-action="open-info"
-                data-dialog-target="info-dialog"
-                data-info-key="additionalNotes"
-                aria-haspopup="dialog"
-                aria-label="Information for Additional Notes"
-              >
-                Info
-              </button>
-            </div>
+            <div class="list-header">
+              <span class="note-details">
+                Note Details
 
-            <div class="list-header" aria-hidden="true">
-              <span>Note Details</span>
+                <button
+                  type="button"
+                  class="btn btn--info btn--small"
+                  data-action="open-info"
+                  data-dialog-target="info-dialog"
+                  data-info-key="additionalNotes"
+                  aria-haspopup="dialog"
+                  aria-label="Information for Additional Notes"
+                ></button>
+              </span>
               <span>Action</span>
             </div>
 
@@ -1137,7 +1145,7 @@
           <div class="form-actions">
             <button
               type="button"
-              class="btn"
+              class="btn btn--primary"
               data-action="clear-form"
               data-form-id="bug-report-form"
             >
@@ -1156,13 +1164,24 @@
           class="card"
           aria-labelledby="bug-report-output-title"
         >
-          <h2 id="bug-report-output-title">Bug Report Output</h2>
-
+          <div class="section-header">
+            <h2 id="bug-report-output-title">Bug Report Output</h2>
+            <button
+              type="button"
+              class="btn btn--info btn--small"
+              data-action="open-info"
+              data-dialog-target="info-dialog"
+              data-info-key="bugReportOutput"
+              aria-haspopup="dialog"
+              aria-label="Information for Bug Report Output"
+            ></button>
+          </div>
           <textarea
             id="bug-report-output"
             class="form-textarea report-preview"
-            tabindex="0"
             readonly
+            aria-live="polite"
+            rows="10"
             placeholder="Generated report will appear here..."
           ></textarea>
           <div class="form-actions">
@@ -1201,9 +1220,7 @@
                     data-info-key="jiraDomain"
                     aria-haspopup="dialog"
                     aria-label="Information for Jira Domain"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <input
                   class="form-input"
@@ -1226,9 +1243,7 @@
                     data-info-key="jiraEmail"
                     aria-haspopup="dialog"
                     aria-label="Information for Jira Email"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <input
                   class="form-input"
@@ -1250,16 +1265,14 @@
                     data-info-key="jiraApiToken"
                     aria-haspopup="dialog"
                     aria-label="Information for Jira API Token"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <input
                   class="form-input"
                   type="password"
                   id="jira-api-token"
                   name="jiraApiToken"
-                  autocomplete="off"
+                  autocomplete="new-password"
                 />
               </div>
             </div>
@@ -1323,9 +1336,7 @@
                     data-info-key="openWebUiUrl"
                     aria-haspopup="dialog"
                     aria-label="Information for Open WebUI URL"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <input
                   class="form-input"
@@ -1348,16 +1359,14 @@
                     data-info-key="openWebUiApiKey"
                     aria-haspopup="dialog"
                     aria-label="Information for Open WebUI API Key"
-                  >
-                    Info
-                  </button>
+                  ></button>
                 </div>
                 <input
                   class="form-input"
                   type="password"
                   id="openwebui-api-key"
                   name="openWebUiApiKey"
-                  autocomplete="off"
+                  autocomplete="new-password"
                 />
               </div>
             </div>
@@ -1430,5 +1439,6 @@
     </dialog>
 
     <script src="./js/navigate.js"></script>
+    <script src="./js/theme-toggle.js"></script>
   </body>
 </html>

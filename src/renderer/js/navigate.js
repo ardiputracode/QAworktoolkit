@@ -1,72 +1,99 @@
 /**
- * Navigasi Work Toolkit
- * Mengatur perpindahan antar section (halaman) dalam satu file (SPA style).
+ * Navigate Module - Advanced Observability Version
  */
 
+// --- TAHAP 1: LOADED (File berhasil masuk ke browser) ---
+console.log('%c[System] Navigate Module: File Loaded ✅', 'color: #0284c7; font-weight: bold;');
+
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Seleksi semua elemen yang dibutuhkan
-  const navContainer = document.querySelector('.app-nav');
-  const navLinks = document.querySelectorAll('[data-page-link]');
-  const pages = document.querySelectorAll('.page');
+  // --- TAHAP 2: INITIALIZATION SEQUENCE ---
+  console.log(
+    '%c[System] Navigate Module: Starting Initialization... ⚙️',
+    'color: #f59e0b; font-weight: bold;'
+  );
 
-  // 2. Gunakan Event Delegation untuk menangani klik pada navigasi
-  navContainer.addEventListener('click', (event) => {
-    // Mencari elemen link terdekat yang memiliki attribute data-page-link
-    // Ini berguna jika di dalam <a> ada elemen lain seperti <span> atau <i>
-    const clickedLink = event.target.closest('[data-page-link]');
+  try {
+    // Langkah A: Mencari elemen navigasi
+    console.log('[Debug] Step 1: Searching for navigation links and pages...');
+    const navLinks = document.querySelectorAll('[data-page-link]');
+    const pages = document.querySelectorAll('.page');
 
-    // Jika yang diklik bukan bagian dari nav-link, abaikan
-    if (!clickedLink) return;
-
-    // Mencegah perilaku default (agar halaman tidak scroll meloncat ke ID)
-    event.preventDefault();
-
-    // 3. Ambil ID target dari atribut href (misal: "#page-home" menjadi "page-home")
-    const targetId = clickedLink.getAttribute('href').replace('#', '');
-    const targetPage = document.getElementById(targetId);
-
-    // 4. Jalankan fungsi update tampilan jika halaman target ditemukan
-    if (targetPage) {
-      updateUI(clickedLink, targetPage);
-
-      // Opsional: Update URL di browser tanpa reload (memungkinkan tombol Back bekerja)
-      window.history.pushState(null, null, `#${targetId}`);
+    if (navLinks.length === 0 || pages.length === 0) {
+      console.warn('[Warning] Navigation elements not found. Check your HTML structure.');
     }
-  });
 
-  /**
-   * Fungsi untuk memperbarui tampilan navigasi dan konten
-   * @param {HTMLElement} activeLink - Link yang sedang aktif
-   * @param {HTMLElement} activePage - Section yang ingin ditampilkan
-   */
-  function updateUI(activeLink, activePage) {
-    // --- Update Navigasi (Link) ---
+    // Langkah B: Mendefinisikan fungsi navigasi
+    console.log('[Debug] Step 2: Defining navigation logic...');
+
+    /**
+     * Fungsi untuk berpindah halaman
+     * @param {string} targetId - ID dari section yang ingin dituju
+     */
+    function navigateTo(targetId) {
+      const id = targetId.replace('#', '');
+      const targetPage = document.getElementById(id);
+
+      if (!targetPage) {
+        console.warn(`[Warning] Target page not found: ${targetId} ⚠️`);
+        return;
+      }
+
+      // --- TAHAP 3: ACTION (Proses perpindahan halaman) ---
+      console.log(
+        `%c[Action] Switched to page: ${id.toUpperCase()} 🗺️`,
+        'color: #8b5cf6; font-weight: bold;'
+      );
+
+      // Sembunyikan semua halaman
+      pages.forEach((page) => {
+        page.setAttribute('hidden', '');
+        page.classList.remove('is-active');
+      });
+
+      // Tampilkan halaman target
+      targetPage.removeAttribute('hidden');
+      targetPage.classList.add('is-active');
+
+      // Update status menu navigasi
+      navLinks.forEach((link) => {
+        const linkHref = link.getAttribute('href');
+        if (linkHref === targetId) {
+          link.classList.add('is-active');
+          link.setAttribute('aria-current', 'page');
+        } else {
+          link.classList.remove('is-active');
+          link.removeAttribute('aria-current');
+        }
+      });
+    }
+
+    // Langkah C: Memasang Event Listener
+    console.log('[Debug] Step 3: Attaching event listeners to nav links...');
     navLinks.forEach((link) => {
-      link.classList.remove('is-active');
-      link.removeAttribute('aria-current');
+      link.addEventListener('click', (event) => {
+        // --- TAHAP 4: USER INTERACTION ---
+        console.log(
+          '%c[User Interaction] Navigation Link Clicked! 🖱️',
+          'color: #f59e0b; font-weight: bold;'
+        );
+
+        event.preventDefault();
+        const targetId = link.getAttribute('href');
+        navigateTo(targetId);
+      });
     });
 
-    activeLink.classList.add('is-active');
-    activeLink.setAttribute('aria-current', 'page');
-
-    // --- Update Konten (Sections/Pages) ---
-    pages.forEach((page) => {
-      page.classList.remove('is-active');
-      page.setAttribute('hidden', ''); // Sembunyikan semua halaman
-    });
-
-    activePage.classList.add('is-active');
-    activePage.removeAttribute('hidden'); // Tampilkan halaman yang dipilih
+    // TAHAP 3: SUCCESS (Semua langkah selesai)
+    console.log(
+      '%c[System] Navigate Module: Initialization Complete! 🚀',
+      'color: #10b981; font-weight: bold;'
+    );
+  } catch (error) {
+    // Jika terjadi kegagalan di tengah jalan
+    console.error(
+      '%c[Error] Navigate Module: Initialization Failed! ❌',
+      'color: #ef4444; font-weight: bold;',
+      error
+    );
   }
-
-  // 5. Menangani tombol Back/Forward pada browser
-  window.addEventListener('popstate', () => {
-    const currentHash = window.location.hash || '#page-home';
-    const targetLink = document.querySelector(`[href="${currentHash}"]`);
-    const targetPage = document.getElementById(currentHash.replace('#', ''));
-
-    if (targetLink && targetPage) {
-      updateUI(targetLink, targetPage);
-    }
-  });
 });
