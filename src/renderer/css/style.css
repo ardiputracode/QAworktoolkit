@@ -761,55 +761,126 @@ a {
   margin-top: 0;
 }
 
-/* --- TINYMCE OVERRIDES (UI LUAR) --- */
-.tox-tinymce {
+/* --- TINYMCE OVERRIDES (FOOLPROOF UI) --- */
+/* Penambahan prefix 'body' memaksa CSS ini mengalahkan default skin TinyMCE */
+
+body .tox-tinymce {
+  background-color: var(--bg-input) !important;
   border: 1px solid var(--border-default) !important;
   border-radius: var(--radius-sm) !important;
   box-shadow: inset 0 2px 4px var(--inner-shadow) !important;
+  transition:
+    background-color 0.25s ease,
+    border-color 0.2s ease !important;
 }
-.tox-tinymce:focus-within {
+
+body .tox-tinymce:focus-within {
   border-color: var(--accent-primary) !important;
   box-shadow:
     0 0 0 3px var(--border-focus),
     inset 0 1px 2px var(--inner-shadow) !important;
 }
-.tox .tox-menubar,
-.tox .tox-toolbar-overlord,
-.tox .tox-toolbar,
-.tox .tox-toolbar__primary,
-.tox .tox-toolbar__overflow,
-.tox .tox-statusbar {
+
+body .tox .tox-editor-header {
   background-color: var(--bg-surface-2) !important;
-  border-color: var(--border-subtle) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+  box-shadow: none !important;
+  padding: 4px 0 !important;
+  transition: background-color 0.25s ease !important;
 }
-.tox .tox-mbtn,
-.tox .tox-tbtn {
+
+body .tox .tox-menubar,
+body .tox .tox-toolbar-overlord,
+body .tox .tox-toolbar,
+body .tox .tox-toolbar__primary,
+body .tox .tox-toolbar__overflow {
+  background-color: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+body .tox .tox-edit-area,
+body .tox .tox-editor-container {
+  background-color: transparent !important;
+}
+
+body .tox .tox-statusbar {
+  background-color: var(--bg-surface-2) !important;
+  border-top: 1px solid var(--border-subtle) !important;
+  transition: background-color 0.25s ease !important;
+}
+
+/* Memastikan Tombol tidak memutih di Dark Mode */
+body .tox .tox-mbtn,
+body .tox .tox-tbtn {
   color: var(--text-primary) !important;
+  background-color: transparent !important;
   border-radius: var(--radius-sm) !important;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease !important;
 }
-.tox .tox-mbtn:hover,
-.tox .tox-tbtn:hover {
+
+body .tox .tox-mbtn:hover,
+body .tox .tox-tbtn:hover {
   background-color: var(--bg-surface-3) !important;
+  color: var(--text-primary) !important;
 }
-.tox .tox-mbtn--active,
-.tox .tox-tbtn--active,
-.tox .tox-tbtn--enabled {
+
+body .tox .tox-mbtn--active,
+body .tox .tox-tbtn--active,
+body .tox .tox-tbtn--enabled,
+body .tox .tox-tbtn--enabled:hover {
   background-color: rgba(99, 102, 241, 0.15) !important;
   color: var(--accent-primary) !important;
 }
-.tox .tox-tbtn svg {
+
+body .tox .tox-tbtn svg {
   fill: var(--text-secondary) !important;
+  transition: fill 0.2s ease !important;
 }
-.tox .tox-tbtn:hover svg,
-.tox .tox-tbtn--enabled svg {
+
+body .tox .tox-tbtn:hover svg,
+body .tox .tox-tbtn--enabled svg,
+body .tox .tox-tbtn--active svg {
   fill: var(--text-primary) !important;
 }
-.tox .tox-statusbar__path-item,
-.tox .tox-statusbar__wordcount,
-.tox .tox-statusbar a {
+
+body .tox .tox-statusbar__path-item,
+body .tox .tox-statusbar__wordcount,
+body .tox .tox-statusbar a {
   color: var(--text-muted) !important;
 }
 
+/* Modals / Dialog UI dari TinyMCE (Contoh: Insert Link) */
+body .tox .tox-dialog-wrap__backdrop {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+}
+body .tox .tox-dialog {
+  background-color: var(--bg-surface-1) !important;
+  border: 1px solid var(--border-default) !important;
+  border-radius: var(--radius-lg) !important;
+}
+body .tox .tox-dialog__header,
+body .tox .tox-dialog__footer {
+  background-color: var(--bg-surface-2) !important;
+  border-color: var(--border-subtle) !important;
+}
+body .tox .tox-dialog__title,
+body .tox .tox-label {
+  color: var(--text-primary) !important;
+}
+body .tox .tox-textfield,
+body .tox .tox-selectfield select {
+  background-color: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-default) !important;
+}
+
+.tox .tox-promotion {
+  display: none !important;
+}
 /* ==========================================================================
    PREMIUM GLASSMORPHISM THEME SWITCH
    ========================================================================== */
@@ -1075,5 +1146,26 @@ a {
   .star {
     animation: none !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==========================================================================
+   VIEW TRANSITION (theme swap crossfade)
+   Satu animasi crossfade untuk seluruh halaman, di-generate dari
+   screenshot before/after lalu di-composite di GPU. Ini menggantikan
+   puluhan CSS transition per-elemen (card, input, tombol, dst) yang
+   kalau jalan bersamaan di halaman yang berat (form panjang + 12
+   editor TinyMCE) bikin main thread keteteran dan kerasa patah-patah.
+   ========================================================================== */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
   }
 }

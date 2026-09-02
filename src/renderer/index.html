@@ -1211,29 +1211,6 @@
             <div class="form-grid">
               <div class="form-field">
                 <div class="form-label-row">
-                  <label class="form-label" for="jira-domain">Jira Domain</label>
-                  <button
-                    type="button"
-                    class="btn btn--info btn--small"
-                    data-action="open-info"
-                    data-dialog-target="info-dialog"
-                    data-info-key="jiraDomain"
-                    aria-haspopup="dialog"
-                    aria-label="Information for Jira Domain"
-                  ></button>
-                </div>
-                <input
-                  class="form-input"
-                  type="url"
-                  id="jira-domain"
-                  name="jiraDomain"
-                  placeholder="https://your-domain.atlassian.net"
-                  autocomplete="url"
-                />
-              </div>
-
-              <div class="form-field">
-                <div class="form-label-row">
                   <label class="form-label" for="jira-email">Jira Email</label>
                   <button
                     type="button"
@@ -1327,29 +1304,6 @@
             <div class="form-grid">
               <div class="form-field">
                 <div class="form-label-row">
-                  <label class="form-label" for="openwebui-url">Open WebUI URL</label>
-                  <button
-                    type="button"
-                    class="btn btn--info btn--small"
-                    data-action="open-info"
-                    data-dialog-target="info-dialog"
-                    data-info-key="openWebUiUrl"
-                    aria-haspopup="dialog"
-                    aria-label="Information for Open WebUI URL"
-                  ></button>
-                </div>
-                <input
-                  class="form-input"
-                  type="url"
-                  id="openwebui-url"
-                  name="openWebUiUrl"
-                  placeholder="https://openwebui.contoh.com"
-                  autocomplete="url"
-                />
-              </div>
-
-              <div class="form-field">
-                <div class="form-label-row">
                   <label class="form-label" for="openwebui-api-key">Open WebUI API Key</label>
                   <button
                     type="button"
@@ -1437,8 +1391,11 @@
         <button type="submit" class="btn btn--primary">Close</button>
       </form>
     </dialog>
-
+    <script src="./vendor/tinymce/tinymce.min.js"></script>
+    <script src="./js/editor-init.js"></script>
     <script src="./js/navigate.js"></script>
     <script src="./js/theme-toggle.js"></script>
+    <script src="./js/project-type-loader.js"></script>
+    <script src="./js/project-name-loader.js"></script>
   </body>
 </html>

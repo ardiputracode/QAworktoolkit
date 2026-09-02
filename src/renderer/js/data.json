@@ -1,0 +1,11 @@
+{
+  "projectTypes": [
+    { "value": "Creation", "label": "Creation" },
+    { "value": "UPD", "label": "Update" }
+  ],
+  "projectNames": [
+    { "value": "alpha-project", "label": "Alpha Project" },
+    { "value": "beta-system", "label": "Beta System" },
+    { "value": "gamma-tool", "label": "Gamma Tool" }
+  ]
+}

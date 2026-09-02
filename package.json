@@ -1,13 +1,11 @@
 {
   "name": "qaworktoolkit",
   "version": "1.0.0",
-  "description": "",
+  "description": "QA Work Toolkit",
   "main": "src/main/main.js",
-  "directories": {
-    "doc": "doc"
-  },
   "scripts": {
     "start": "electron .",
+    "portable": "electron-builder --win portable",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
@@ -25,6 +23,21 @@
   "homepage": "https://github.com/ardiputracode/QAworktoolkit#readme",
   "devDependencies": {
     "electron": "^30.0.0",
+    "electron-builder": "^26.15.3",
     "prettier": "^3.9.6"
+  },
+  "build": {
+    "appId": "com.qaworktoolkit.app",
+    "productName": "QA Work Toolkit",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "portable"
+    }
   }
 }
