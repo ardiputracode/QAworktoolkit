@@ -7,5 +7,7 @@
     { "value": "alpha-project", "label": "Alpha Project" },
     { "value": "beta-system", "label": "Beta System" },
     { "value": "gamma-tool", "label": "Gamma Tool" }
-  ]
+  ],
+
+  "JIRA_BASE_URL": "https://gameloft.atlassian.net"
 }

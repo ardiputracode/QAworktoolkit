@@ -1233,7 +1233,7 @@
               Clear Input
             </button>
 
-            <button type="submit" class="btn btn--primary">Generate Report</button>
+            <button type="submit" class="btn btn--primary">Generate Bug Description</button>
           </div>
 
           <div id="bug-report-status" class="status" role="status" aria-live="polite"></div>
@@ -1350,10 +1350,26 @@
               <div id="jira-status" class="status" role="status" aria-live="polite">
                 Jira Status
               </div>
-              <p class="form-help">
-                <strong>Connected Jira User:</strong>
-                <span id="jira-connected-user">-</span>
-              </p>
+              <div style="display: flex; align-items: center; margin-top: 10px">
+                <p class="form-help" style="margin: 0">
+                  <strong>Connected Jira User:</strong>
+                  <!-- Tambahkan elemen image di sini -->
+                  <img
+                    id="jira-avatar"
+                    src=""
+                    alt="User Avatar"
+                    style="
+                      display: none;
+                      width: 40px;
+                      height: 40px;
+                      border-radius: 50%;
+                      margin-right: 12px;
+                      object-fit: cover;
+                    "
+                  />
+                  <span id="jira-connected-user">-</span>
+                </p>
+              </div>
             </div>
 
             <div class="form-actions">
@@ -1478,5 +1494,6 @@
     <script src="./js/theme-toggle.js"></script>
     <script src="./js/project-type-loader.js"></script>
     <script src="./js/project-name-loader.js"></script>
+    <script src="./js/jira-api.js"></script>
   </body>
 </html>
