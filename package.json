@@ -1,6 +1,6 @@
 {
   "name": "qaworktoolkit",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "QA Work Toolkit",
   "main": "src/main/main.js",
   "scripts": {

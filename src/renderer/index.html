@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -55,8 +55,89 @@
       <section id="page-home" class="page is-active" aria-labelledby="page-home-title">
         <h1 class="page-title" id="page-home-title">Home</h1>
 
-        <div class="card">
-          <p>Work in Progress</p>
+        <!-- Hero Section -->
+        <div class="card hero-section">
+          <h2 class="hero-title">Work Toolkit</h2>
+          <p class="hero-subtitle">Tools to simplify QA reporting and bug documentation.</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="home-group">
+          <h3 class="section-label">Quick Actions</h3>
+          <div class="grid-actions">
+            <!-- Action Card 1 -->
+            <div class="card action-card">
+              <div class="action-header">
+                <span class="action-icon">📝</span>
+                <h4>Create QA Report</h4>
+              </div>
+              <p>Build a structured QA progress report.</p>
+              <a
+                href="#page-report-builder"
+                class="btn btn--primary btn--small action-btn"
+                data-page-link
+                >Open Report Builder →</a
+              >
+            </div>
+
+            <!-- Action Card 2 -->
+            <div class="card action-card">
+              <div class="action-header">
+                <span class="action-icon">🐞</span>
+                <h4>Format Bug Report</h4>
+              </div>
+              <p>
+                Transforming structured but rough bug information—with incomplete sentences,
+                grammatical errors, mixed Indonesian and English, and typos—into a clear, polished,
+                Jira-ready bug description.
+              </p>
+              <a
+                href="#page-bug-report-formatter"
+                class="btn btn--primary btn--small action-btn"
+                data-page-link
+                >Open Bug Formatter →</a
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Continue Your Work -->
+        <div class="home-group">
+          <h3 class="section-label">Continue Your Work</h3>
+          <div class="card recent-work-row">
+            <div class="recent-info">
+              <h4>QA Progress Report — Project ABC</h4>
+              <p class="last-edited">Last edited Today, 20:14</p>
+            </div>
+            <a href="#" class="btn btn--small" style="width: auto">Continue Editing →</a>
+          </div>
+        </div>
+
+        <!-- Setup Section -->
+        <div class="home-group">
+          <h3 class="section-label">Setup</h3>
+          <div class="card setup-card">
+            <ul class="setup-list">
+              <li><span class="check-mark">✓</span> Jira configured</li>
+              <li><span class="check-mark">✓</span> Open WebUI configured</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Pro Tip Section (Moved Below Setup) -->
+        <div class="home-group">
+          <h3 class="section-label">💡 Pro Tip</h3>
+          <div class="card pro-tip-card">
+            <div class="process-steps">
+              <span>Enter Information</span>
+              <span class="arrow">→</span>
+              <span>Generate</span>
+              <span class="arrow">→</span>
+              <span>Copy</span>
+              <span class="arrow">→</span>
+              <span>Review</span>
+            </div>
+          </div>
         </div>
       </section>
 

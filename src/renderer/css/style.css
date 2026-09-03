@@ -1169,3 +1169,191 @@ body .tox .tox-selectfield select {
     animation: none !important;
   }
 }
+
+/* ==========================================================================
+   HOME PAGE UTILITIES (Custom components using your Design System)
+   ========================================================================== */
+
+.home-group {
+  margin-bottom: 2.5rem;
+}
+
+.section-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+/* Hero Section */
+.hero-section {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: var(--bg-surface-2); /* Subtle contrast */
+  border: 1px solid var(--border-subtle);
+}
+
+.hero-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+}
+
+.hero-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+/* Quick Actions Grid */
+.grid-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.action-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 180px;
+}
+
+.action-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.action-icon {
+  font-size: 1.5rem;
+}
+
+.action-card h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.action-card p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  flex-grow: 1; /* Makes the button align to bottom */
+}
+
+.action-btn {
+  width: fit-content;
+}
+
+/* Recent Work Row */
+.recent-work-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+}
+
+.recent-info h4 {
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+}
+
+.last-edited {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Footer Grid (Setup & Process) */
+
+/* Gaya Khusus Pro Tip agar terlihat seperti 'Callout' informasi */
+.pro-tip-card {
+  border: 1px solid var(--accent-cyan); /* Menggunakan warna cyan agar menonjol */
+  background: var(--bg-surface-1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efek cahaya tipis di pojok kartu Pro Tip */
+.pro-tip-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--gradient-brand); /* Memberikan aksen gradien di pinggir */
+}
+
+/* Memastikan alur proses tetap rapi */
+.process-steps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.process-steps .arrow {
+  color: var(--accent-cyan); /* Tetap menggunakan warna cyan agar dinamis */
+  font-weight: bold;
+  font-size: 4.5rem; /* Memperbesar ukuran panah */
+  line-height: 0; /* Mencegah panah yang besar merusak jarak antar baris teks */
+  display: inline-block; /* Memastikan properti font dan transform bekerja dengan baik */
+}
+
+/* Setup List */
+.setup-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.setup-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.check-mark {
+  color: var(--accent-cyan);
+  font-weight: bold;
+}
+
+/* Process Flow */
+.process-steps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.process-steps .arrow {
+  color: var(--text-muted);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+  .recent-work-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .process-steps {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
