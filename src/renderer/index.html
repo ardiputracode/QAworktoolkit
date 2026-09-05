@@ -150,43 +150,36 @@
       >
         <h1 class="page-title" id="page-report-builder-title">Report Builder</h1>
 
-        <!-- Sub-section: Toolbar -->
-        <fieldset class="form-section">
-          <legend>
-            <span>Report Builder Actions</span>
+        <!-- Sub-section: Draft Management-->
+        <fieldset class="form-section" id="saved-drafts-section">
+          <legend id="drafts-title">
+            <span>Draft Management</span>
 
             <button
               type="button"
               class="btn btn--info btn--small"
               data-action="open-info"
               data-dialog-target="info-dialog"
-              data-info-key="reportBuilderActions"
+              data-info-key="savedDraftInfo"
               aria-haspopup="dialog"
-              aria-label="Information for Report Builder Actions"
+              aria-label="Information for Saved Draft"
             ></button>
           </legend>
 
-          <div class="toolbar">
-            <button
-              type="button"
-              class="btn"
-              data-action="export-report"
-              data-status-target="report-builder-status"
-            >
-              Export Report Draft
+          <!-- --- ADD: Toolbar Global (Hanya tombol Import) --- -->
+          <div class="draft-toolbar" style="display: flex; gap: 10px; margin-bottom: 15px">
+            <button type="button" id="btn-import-global" class="btn btn--primary">
+              📥 Import Drafts
             </button>
-
-            <button
-              type="button"
-              class="btn"
-              data-action="import-report"
-              data-status-target="report-builder-status"
-            >
-              Import Report Draft
-            </button>
-
-            <input type="file" id="report-import-file" accept="application/json,.json" hidden />
           </div>
+
+          <!-- Container ini akan diisi oleh JavaScript -->
+          <div id="drafts-list-container">
+            <p class="empty-msg" style="padding: 1rem; color: var(--text-muted)">
+              No saved drafts found.
+            </p>
+          </div>
+          <input type="file" id="global-import-input" accept=".json" style="display: none" />
         </fieldset>
 
         <div id="report-builder-status" class="status" role="status" aria-live="polite"></div>
@@ -809,7 +802,10 @@
               data-action="clear-form"
               data-form-id="report-builder-form"
             >
-              Clear Draft
+              🧹 Clear Draft
+            </button>
+            <button type="button" class="btn btn--primary" id="btn-save-draft">
+              💾 Save Draft
             </button>
           </div>
         </form>
@@ -1337,7 +1333,7 @@
 
             <div class="form-actions">
               <button
-                type="button"
+                type="submit"
                 class="btn"
                 data-action="test-jira"
                 data-status-target="jira-status"
@@ -1475,19 +1471,35 @@
     <footer class="app-footer">© 2026 Work Toolkit</footer>
 
     <!-- ======================= DIALOG (MODAL) ======================= -->
-    <dialog
-      id="info-dialog"
-      class="info-dialog"
-      aria-labelledby="info-dialog-title"
-      aria-describedby="info-dialog-message"
-    >
+    <dialog id="info-dialog" class="info-dialog" aria-labelledby="info-dialog-title">
       <h2 id="info-dialog-title">Info</h2>
       <p id="info-dialog-message">Detail informasi akan ditampilkan di sini.</p>
 
+      <!-- Bagian Input (untuk mode Prompt) -->
+      <div id="save-name-container" style="display: none; margin: 15px 0">
+        <label for="draft-name-input" class="form-label">Nama Draft:</label>
+        <input
+          type="text"
+          id="draft-name-input"
+          class="form-input"
+          placeholder="Contoh: Report Project ABC"
+        />
+      </div>
+
+      <!-- Tombol Aksi -->
       <form method="dialog" class="form-actions">
-        <button type="submit" class="btn btn--primary">Close</button>
+        <button type="button" id="dialog-cancel-btn" class="btn btn--danger btn--small">
+          Batal
+        </button>
+        <button type="submit" id="dialog-confirm-btn" class="btn btn--primary btn--small">
+          OK
+        </button>
       </form>
     </dialog>
+
+    <div id="toast-container" class="toast-container"></div>
+    <!-- Wadah untuk notifikasi -->
+
     <script src="./vendor/tinymce/tinymce.min.js"></script>
     <script src="./js/editor-init.js"></script>
     <script src="./js/navigate.js"></script>
@@ -1495,5 +1507,8 @@
     <script src="./js/project-type-loader.js"></script>
     <script src="./js/project-name-loader.js"></script>
     <script src="./js/jira-api.js"></script>
+    <script src="./js/subject-auto-fill.js"></script>
+    <script src="./js/info-dialog.js"></script>
+    <script type="module" src="./js/report-builder-logic.js"></script>
   </body>
 </html>

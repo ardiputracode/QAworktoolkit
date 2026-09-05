@@ -4,9 +4,13 @@
     { "value": "UPD", "label": "Update" }
   ],
   "projectNames": [
-    { "value": "alpha-project", "label": "Alpha Project" },
-    { "value": "beta-system", "label": "Beta System" },
-    { "value": "gamma-tool", "label": "Gamma Tool" }
+    { "value": "ALU", "label": "ALU" },
+    { "value": "APEX", "label": "APEX" },
+    { "value": "BMC", "label": "BMC" },
+    { "value": "DDV", "label": "DDV" },
+    { "value": "DM2", "label": "DM2" },
+    { "value": "DMK", "label": "DMK" },
+    { "value": "FFP", "label": "FFP" }
   ],
 
   "JIRA_BASE_URL": "https://gameloft.atlassian.net"

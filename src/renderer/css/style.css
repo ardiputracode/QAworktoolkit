@@ -619,6 +619,7 @@ a {
   padding: 0.4rem 0.75rem;
   font-size: 0.8rem;
 }
+
 .btn--primary:hover,
 .btn--copy:hover {
   background: var(--gradient-button-hover);
@@ -632,6 +633,8 @@ a {
 /* Danger / Clear Buttons */
 .btn--danger,
 [data-action='clear-form'] {
+  width: 100%;
+  height: 38px;
   color: #fff;
   background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -639,6 +642,7 @@ a {
     0 6px 24px rgba(220, 38, 38, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
+
 .btn--danger:hover,
 [data-action='clear-form']:hover {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
@@ -652,6 +656,17 @@ a {
 .btn--small {
   padding: 0.4rem 0.75rem;
   font-size: 0.8rem;
+}
+
+.btn--toolbar-small {
+  width: 90px;
+  min-width: 90px;
+  height: 30px;
+  padding: 0 0.5rem;
+  font-size: 0.8rem;
+  line-height: 1;
+  box-sizing: border-box;
+  white-space: nowrap;
 }
 
 /* Status Text */
@@ -1356,4 +1371,93 @@ body .tox .tox-selectfield select {
     flex-wrap: wrap;
     justify-content: center;
   }
+}
+
+/* Gaya saat tombol berhasil copy */
+.btn.is-copied {
+  /* Menggunakan warna hijau sukses (emerald/green) */
+  background: #10b981 !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+
+  /* Memberikan efek 'pop' sedikit agar terasa responsif */
+  transform: scale(1.05);
+
+  /* Memberikan glow hijau yang senada dengan shadow tombol asli kamu */
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+
+  /* Memastikan transisi balik ke normal terasa halus */
+  transition: all 0.3s ease;
+}
+
+/* Opsional: Jika kamu ingin efek klik yang lebih 'mati' saat sedang proses copy */
+.btn.is-copied {
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   TOAST NOTIFICATION (THEME-ADAPTED)
+   ========================================================================== */
+
+/* Container Notifikasi */
+.toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Style Dasar Toast */
+.toast {
+  min-width: 250px;
+  padding: 1rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #ffffff;
+  border-radius: var(--radius-md); /* Mengikuti radius tema */
+  box-shadow: var(--shadow-lg); /* Mengikuti shadow 3D tema */
+  border: 1px solid rgba(255, 255, 255, 0.18); /* Efek glass pinggiran */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; /* Curve transisi tema */
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease;
+}
+
+/* Warna berdasarkan tipe (Mengambil referensi palet tombol tema) */
+.toast--success {
+  /* Menggunakan hijau zamrud dari state .is-copied */
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.toast--error {
+  /* Menggunakan gradien merah dari .btn--danger */
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+.toast--info {
+  /* Menggunakan gradien utama tema */
+  background: var(--gradient-button);
+}
+
+/* Animasi masuk (slide dari kanan) */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Efek saat mau hilang */
+.fade-out {
+  opacity: 0;
+  transform: translateX(20px);
 }
