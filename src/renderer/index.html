@@ -106,10 +106,19 @@
           <h3 class="section-label">Continue Your Work</h3>
           <div class="card recent-work-row">
             <div class="recent-info">
-              <h4>QA Progress Report — Project ABC</h4>
-              <p class="last-edited">Last edited Today, 20:14</p>
+              <!-- Tambahkan ID pada h4 dan p agar bisa diakses JS -->
+              <h4 id="home-recent-title">No recent work</h4>
+              <p id="home-recent-timestamp" class="last-edited">Last edited -</p>
             </div>
-            <a href="#" class="btn btn--small" style="width: auto">Continue Editing →</a>
+            <!-- Pastikan href mengarah ke section report builder -->
+            <a
+              href="#page-report-builder"
+              class="btn btn--small"
+              action-btn
+              data-page-link
+              style="width: auto"
+              >Continue Editing →</a
+            >
           </div>
         </div>
 

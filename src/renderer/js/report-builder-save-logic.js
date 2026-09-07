@@ -20,6 +20,37 @@ const globalImportInput = document.getElementById('global-import-input');
 let activeImportTargetId = null; // Null jika ingin buat baru, berisi ID jika ingin replace
 
 /**
+ * FUNGSI BARU: Memperbarui tampilan Home berdasarkan data autosave
+ */
+function updateHomeSection(draft) {
+  const titleEl = document.getElementById('home-recent-title');
+  const timeEl = document.getElementById('home-recent-timestamp');
+
+  if (!titleEl || !timeEl) return;
+
+  // Jika ada draft (khususnya autosave)
+  if (draft && draft.id === AUTOSAVE_FIXED_ID) {
+    // Mengambil nama project dari data form, jika kosong pakai 'Untitled'
+    const projectName = draft.data?.projectName?.trim() || 'Untitled Project';
+    titleEl.textContent = `QA Progress Report — ${projectName}`;
+
+    // Format tanggal ke format lokal Indonesia (Contoh: 24 Mei 2024, 14:00)
+    const dateStr = new Date(draft.timestamp).toLocaleString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    timeEl.textContent = `Last edited ${dateStr}`;
+  } else {
+    // Jika tidak ada autosave, tampilkan state kosong
+    titleEl.textContent = 'No recent work';
+    timeEl.textContent = 'Last edited -';
+  }
+}
+
+/**
  * FUNGSI SUPER DIALOG
  */
 function showCustomDialog(mode, message) {
@@ -165,6 +196,21 @@ function reconstructDynamicList(containerId, templateId, values) {
   });
 }
 
+/**
+ * Helper: sinkronisasi UI yang bergantung pada data form (Project Type visibility,
+ * Subject Auto Fill), supaya logic-nya sama persis dipakai baik dari flow
+ * autosave maupun flow Open Draft. Jangan duplicate logic ini di tempat lain.
+ */
+function syncDependentUI() {
+  if (typeof ProjectTypeLoader !== 'undefined') {
+    ProjectTypeLoader.updateVisibility();
+  }
+
+  if (typeof SubjectAutoFill !== 'undefined' && SubjectAutoFill.update) {
+    SubjectAutoFill.update();
+  }
+}
+
 // --- UI HANDLERS ---
 
 async function refreshDraftsList() {
@@ -221,6 +267,7 @@ async function refreshDraftsList() {
       const isConfirmed = await showCustomDialog('confirm', `Buka draft "${draft.name}"?`);
       if (isConfirmed) {
         fillForm(draft.data);
+        syncDependentUI();
         showToast(`Draft "${draft.name}" berhasil dibuka!`, 'success');
       }
     };
@@ -439,6 +486,7 @@ const AUTOSAVE_FIXED_ID = 'autosave-special-entry';
  */
 let lastAutosaveToastTime = 0;
 
+// --- Update fungsi performAutoSave agar memanggil updateHomeSection ---
 async function performAutoSave() {
   try {
     const formData = getFormData();
@@ -451,14 +499,14 @@ async function performAutoSave() {
 
     await dbManager.saveDraft(autoSaveDraft);
 
-    // --- LOGIKA NOTIFIKASI YANG SOPAN (THROTTLING) ---
+    // UPDATE DI SINI: Panggil fungsi update UI
+    updateHomeSection(autoSaveDraft);
+
     const now = Date.now();
-    // Hanya tampilkan toast jika sudah lewat minimal 10 detik dari toast terakhir
     if (now - lastAutosaveToastTime > 10000) {
       showToast('Autosave berhasil!', 'info');
-      lastAutosaveToastTime = now; // Update waktu terakhir toast muncul
+      lastAutosaveToastTime = now;
     }
-    // -------------------------------------------------
   } catch (err) {
     console.error('Auto-save failed:', err);
   }
@@ -473,16 +521,16 @@ async function loadAutosaveIfAvailable() {
 
     if (autosaveEntry) {
       fillForm(autosaveEntry.data);
-      // Tambahkan ini agar kolom Update Number langsung muncul jika tipenya "Update"
-      if (typeof ProjectTypeLoader !== 'undefined') {
-        ProjectTypeLoader.updateVisibility();
-      }
-      // TAMBAHKAN INI: Trigger update manual setelah form diisi
-      if (typeof SubjectAutoFill !== 'undefined' && SubjectAutoFill.update) {
-        SubjectAutoFill.update();
-      }
+
+      // UPDATE DI SINI: Panggil fungsi update UI saat pertama kali load
+      updateHomeSection(autosaveEntry);
+
+      syncDependentUI();
       console.log('%c[System] Autosave data loaded automatically. ✅', 'color: #10b981;');
       showToast('Data autosave dimuat otomatis.', 'info');
+    } else {
+      // Jika tidak ada autosave, reset tampilan home ke kosong
+      updateHomeSection(null);
     }
   } catch (err) {
     console.error('Failed to load autosave:', err);
