@@ -23,6 +23,12 @@ let activeImportTargetId = null; // Null jika ingin buat baru, berisi ID jika in
  * FUNGSI SUPER DIALOG
  */
 function showCustomDialog(mode, message) {
+  // Guard: kalau elemen dialog inti tidak ada di DOM, jangan sampai throw.
+  if (!infoDialog || !infoMsg || !dialogConfirmBtn) {
+    console.error('Dialog elements are missing from the DOM.');
+    return Promise.resolve(mode === 'prompt' ? '' : false);
+  }
+
   return new Promise((resolve) => {
     let isResolved = false;
     const safeResolve = (value) => {
@@ -32,38 +38,47 @@ function showCustomDialog(mode, message) {
       }
     };
 
+    if (infoTitle) {
+      infoTitle.textContent =
+        mode === 'confirm' ? 'Konfirmasi' : mode === 'prompt' ? 'Simpan Draft' : 'Informasi';
+    }
+
     infoMsg.textContent = message;
-    saveNameContainer.style.display = 'none';
-    dialogCancelBtn.style.display = 'none';
+    if (saveNameContainer) saveNameContainer.style.display = 'none';
+    if (dialogCancelBtn) dialogCancelBtn.style.display = 'none';
     dialogConfirmBtn.textContent = 'OK';
-    draftNameInput.value = '';
+    if (draftNameInput) draftNameInput.value = '';
 
     if (mode === 'confirm') {
-      dialogCancelBtn.style.display = 'inline-block';
+      if (dialogCancelBtn) dialogCancelBtn.style.display = 'inline-block';
       dialogConfirmBtn.textContent = 'Ya';
     } else if (mode === 'prompt') {
-      saveNameContainer.style.display = 'block';
+      if (saveNameContainer) saveNameContainer.style.display = 'block';
       dialogConfirmBtn.textContent = 'Simpan';
     }
 
+    // Pakai assignment ke properti onclose/onsubmit (bukan addEventListener)
+    // supaya listener lama otomatis tertimpa tiap dialog dibuka -> tidak menumpuk.
     const handleClose = () => {
-      infoDialog.removeEventListener('close', handleClose);
       if (!isResolved) safeResolve(mode === 'prompt' ? '' : false);
     };
-    infoDialog.addEventListener('close', handleClose);
+    infoDialog.onclose = handleClose;
 
     const formElement = infoDialog.querySelector('form');
-    const handleFormSubmit = (e) => {
+    const handleFormSubmit = () => {
       if (mode === 'confirm') safeResolve(true);
-      else if (mode === 'prompt') safeResolve(draftNameInput.value.trim());
+      else if (mode === 'prompt') safeResolve(draftNameInput ? draftNameInput.value.trim() : '');
       else safeResolve(true);
     };
-    formElement.addEventListener('submit', handleFormSubmit);
+    if (formElement) formElement.onsubmit = handleFormSubmit;
 
-    dialogCancelBtn.onclick = () => {
-      infoDialog.close();
-      safeResolve(false);
-    };
+    if (dialogCancelBtn) {
+      dialogCancelBtn.onclick = () => {
+        infoDialog.close();
+        safeResolve(false);
+      };
+    }
+
     infoDialog.showModal();
   });
 }
@@ -71,8 +86,10 @@ function showCustomDialog(mode, message) {
 // --- CORE FUNCTIONS ---
 
 function getFormData() {
-  const formData = new FormData(form);
   const data = {};
+  if (!form) return data;
+
+  const formData = new FormData(form);
   formData.forEach((value, key) => {
     if (key.endsWith('[]')) {
       const realKey = key.replace('[]', '');
@@ -97,10 +114,22 @@ function getFormData() {
 }
 
 function fillForm(data) {
+  if (!form || !data) return;
+
   form.reset();
   Object.keys(data).forEach((key) => {
     const element = form.elements[key];
     if (!element || key === 'stepDescription' || key === 'noteDetails' || key === 'testers') return;
+
+    // FIX: form.elements[key] bisa berupa RadioNodeList kalau key adalah radio group.
+    // RadioNodeList tidak punya .id seperti element biasa, jadi harus ditangani
+    // terpisah SEBELUM masuk ke logic TinyMCE (tinymce.get(element.id) akan salah
+    // kalau dijalankan pada RadioNodeList).
+    if (element instanceof RadioNodeList) {
+      element.value = data[key];
+      return;
+    }
+
     const editor = tinymce.get(element.id);
     if (editor) editor.setContent(data[key]);
     else if (element.type !== 'checkbox') element.value = data[key];
@@ -117,10 +146,17 @@ function fillForm(data) {
 }
 
 function reconstructDynamicList(containerId, templateId, values) {
-  if (!values || !Array.isArray(values)) return;
   const container = document.getElementById(containerId);
   const template = document.getElementById(templateId);
+  if (!container || !template) return;
+
+  // Bersihkan container terlebih dahulu, baru cek validitas values.
+  // Ini mencegah data dynamic list dari draft sebelumnya tertinggal
+  // ketika draft baru tidak punya data untuk list ini.
   container.innerHTML = '';
+
+  if (!values || !Array.isArray(values)) return;
+
   values.forEach((val) => {
     const clone = template.content.cloneNode(true);
     const input = clone.querySelector('[data-row-input]');
@@ -132,18 +168,29 @@ function reconstructDynamicList(containerId, templateId, values) {
 // --- UI HANDLERS ---
 
 async function refreshDraftsList() {
-  const drafts = await dbManager.getAllDrafts();
-  const container = document.getElementById('drafts-list-container');
+  if (!draftsContainer) return;
 
-  if (drafts.length === 0) {
-    container.innerHTML =
+  let drafts;
+  try {
+    drafts = await dbManager.getAllDrafts();
+  } catch (err) {
+    console.error('Failed to load drafts:', err);
+    showToast('Gagal memuat daftar draft.', 'error');
+    return;
+  }
+
+  // --- FILTER AUTOSAVE SEBELUM CEK KOSONG ---
+  const manualDrafts = drafts.filter((draft) => draft.id !== AUTOSAVE_FIXED_ID);
+
+  if (manualDrafts.length === 0) {
+    draftsContainer.innerHTML =
       '<p class="empty-msg" style="padding: 1rem; color: var(--text-muted);">No saved drafts found.</p>';
     return;
   }
 
-  container.innerHTML = '';
+  draftsContainer.innerHTML = '';
 
-  drafts.forEach((draft) => {
+  manualDrafts.forEach((draft) => {
     const draftRow = document.createElement('div');
     draftRow.className = 'draft-item';
     draftRow.style = `display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid var(--border-color, #ddd);`;
@@ -167,6 +214,7 @@ async function refreshDraftsList() {
 
     // 1. Button Open
     const loadBtn = document.createElement('button');
+    loadBtn.type = 'button';
     loadBtn.className = 'btn btn--primary btn--toolbar-small';
     loadBtn.textContent = '📝 Open';
     loadBtn.onclick = async () => {
@@ -179,19 +227,26 @@ async function refreshDraftsList() {
 
     // 2. Button Delete
     const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
     deleteBtn.className = 'btn btn--danger btn--toolbar-small';
     deleteBtn.textContent = '🧹 Delete';
     deleteBtn.onclick = async () => {
       const isConfirmed = await showCustomDialog('confirm', `Hapus draft "${draft.name}"?`);
       if (isConfirmed) {
-        await dbManager.deleteDraft(draft.id);
-        showToast(`Draft "${draft.name}" dihapus!`, 'success');
-        refreshDraftsList();
+        try {
+          await dbManager.deleteDraft(draft.id);
+          showToast(`Draft "${draft.name}" dihapus!`, 'success');
+          refreshDraftsList();
+        } catch (err) {
+          console.error('Failed to delete draft:', err);
+          showToast('Gagal menghapus draft.', 'error');
+        }
       }
     };
 
     // 3. Button Export Single (Per Draft)
     const exportBtn = document.createElement('button');
+    exportBtn.type = 'button';
     exportBtn.className = 'btn btn--primary btn--toolbar-small';
     exportBtn.textContent = '📤 Export';
     exportBtn.title = 'Export this draft only';
@@ -199,12 +254,13 @@ async function refreshDraftsList() {
 
     // 4. Button Import/Replace Single (Per Draft)
     const importBtn = document.createElement('button');
+    importBtn.type = 'button';
     importBtn.className = 'btn btn--primary btn--toolbar-small';
     importBtn.textContent = '📥 Import';
     importBtn.title = 'Import & Replace this specific draft';
     importBtn.onclick = () => {
       activeImportTargetId = draft.id;
-      globalImportInput.click();
+      if (globalImportInput) globalImportInput.click();
     };
 
     actionsDiv.appendChild(loadBtn);
@@ -213,7 +269,7 @@ async function refreshDraftsList() {
     actionsDiv.appendChild(importBtn);
     draftRow.appendChild(infoDiv);
     draftRow.appendChild(actionsDiv);
-    container.appendChild(draftRow);
+    draftsContainer.appendChild(draftRow);
   });
 }
 
@@ -221,40 +277,23 @@ async function refreshDraftsList() {
 // LOGIC: EXPORT & IMPORT (SMART MODE)
 // =====================================================================
 
-/**
- * [SINGLE] Export satu draft spesifik
- */
-/**
- * [SINGLE] Export satu draft spesifik
- * Menggunakan File System Access API agar bisa menunggu user selesai menyimpan
- */
 async function handleExportSingle(draft) {
   const content = JSON.stringify(draft, null, 2);
-  const fileName = `${draft.name.replace(/\s+/g, '_')}_export.json`;
+  // Sanitasi whitespace + karakter yang tidak valid untuk nama file Windows: < > : " / \ | ? *
+  const safeName = draft.name.replace(/\s+/g, '_').replace(/[<>:"/\\|?*]/g, '');
+  const fileName = `${safeName}_export.json`;
 
-  // 1. Cek apakah browser mendukung modern File System Access API (Chrome/Edge)
   if (window.showSaveFilePicker) {
     try {
-      // Ini akan memunculkan dialog dan "menunggu" sampai user klik SAVE atau CANCEL
       const fileHandle = await window.showSaveFilePicker({
         suggestedName: fileName,
-        types: [
-          {
-            description: 'JSON File',
-            accept: { 'application/json': ['.json'] },
-          },
-        ],
+        types: [{ description: 'JSON File', accept: { 'application/json': ['.json'] } }],
       });
-
-      // Membuat stream untuk menulis file
       const writable = await fileHandle.createWritable();
       await writable.write(content);
       await writable.close();
-
-      // Toast ini BARU muncul setelah file benar-benar selesai ditulis ke disk
       showToast(`Draft "${draft.name}" berhasil diekspor!`, 'success');
     } catch (err) {
-      // Jika user menekan "Cancel", kita tidak ingin menampilkan error/toast sukses
       if (err.name === 'AbortError') {
         console.log('User membatalkan proses simpan.');
       } else {
@@ -263,7 +302,6 @@ async function handleExportSingle(draft) {
       }
     }
   } else {
-    // 2. FALLBACK: Jika browser lama (seperti Firefox/Safari) tidak mendukung API di atas
     const blob = new Blob([content], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -271,46 +309,56 @@ async function handleExportSingle(draft) {
     link.download = fileName;
     link.click();
     URL.revokeObjectURL(url);
-
-    // Karena di mode fallback kita tidak bisa tahu kapan user selesai,
-    // kita ubah pesan toastnya menjadi "dimulai" agar jujur secara UX.
     showToast(`Proses ekspor "${draft.name}" dimulai...`, 'info');
   }
 }
 
-/**
- * [SMART IMPORT]
- * Jika activeImportTargetId ada -> Ganti draft lama (Replace)
- * Jika activeImportTargetId null -> Buat draft baru (Create New)
- */
 async function handleSmartImport(event) {
   const file = event.target.files[0];
-  if (!file) return;
-  event.target.value = ''; // Reset input agar bisa pilih file yang sama lagi jika gagal
+  if (!file) {
+    // Tidak ada file terpilih (mis. beberapa browser tetap memicu 'change' dengan
+    // FileList kosong saat dialog dibatalkan) -> pastikan target replace direset
+    // supaya proses import berikutnya tidak salah mode.
+    activeImportTargetId = null;
+    return;
+  }
+  event.target.value = '';
 
   const reader = new FileReader();
+
+  // Kalau FileReader gagal membaca file, jangan tinggalkan activeImportTargetId
+  // dalam keadaan stale (replace mode nyangkut ke draft yang salah).
+  reader.onerror = () => {
+    console.error('Failed to read file:', reader.error);
+    showToast('Gagal membaca file.', 'error');
+    activeImportTargetId = null;
+  };
+
   reader.onload = async (e) => {
     try {
       let importedData;
-
-      // 1. Tahap Parsing JSON
       try {
         importedData = JSON.parse(e.target.result);
       } catch (jsonErr) {
         throw new Error('Format file bukan JSON yang valid.');
       }
 
-      // 2. Tahap Validasi Struktur
-      if (!importedData || typeof importedData !== 'object') {
+      if (!importedData || typeof importedData !== 'object' || Array.isArray(importedData)) {
         throw new Error('File kosong atau format tidak dikenal.');
       }
 
-      // Cek apakah properti wajib (name dan data) ada
-      if (!importedData.name || !importedData.data) {
-        throw new Error('Format file salah: Data atau Nama draft tidak ditemukan dalam file.');
+      if (typeof importedData.name !== 'string' || importedData.name.trim() === '') {
+        throw new Error('Format file salah: Nama draft tidak ditemukan atau tidak valid.');
       }
 
-      // 3. Konfirmasi Mode (Replace vs New)
+      if (
+        !importedData.data ||
+        typeof importedData.data !== 'object' ||
+        Array.isArray(importedData.data)
+      ) {
+        throw new Error('Format file salah: Data draft tidak ditemukan atau tidak valid.');
+      }
+
       const isReplaceMode = activeImportTargetId !== null;
       const modeMsg = isReplaceMode ? 'MENGGANTI' : 'MEMBUAT BARU';
 
@@ -320,7 +368,6 @@ async function handleSmartImport(event) {
       );
 
       if (isConfirmed) {
-        // Siapkan objek draft baru
         const newDraft = {
           ...(isReplaceMode ? { id: activeImportTargetId } : {}),
           name: importedData.name,
@@ -328,58 +375,149 @@ async function handleSmartImport(event) {
           data: importedData.data,
         };
 
-        // 4. Tahap Penyimpanan ke Database
         try {
           await dbManager.saveDraft(newDraft);
           showToast(`Berhasil! Draft "${newDraft.name}" diproses.`, 'success');
         } catch (dbErr) {
-          // Jika error terjadi di database (misal: ID duplikat atau masalah storage)
+          console.error('Failed to save imported draft:', dbErr);
           throw new Error(`Gagal menyimpan ke database: ${dbErr.message}`);
         }
 
-        // Reset target setelah selesai agar tidak salah mode di klik berikutnya
-        activeImportTargetId = null;
         refreshDraftsList();
       }
     } catch (err) {
-      // Tampilkan pesan error yang sebenarnya (dari 'throw new Error')
       showToast(err.message, 'error');
       console.error('Detailed Import Error:', err);
+    } finally {
+      // Selalu reset target replace, baik sukses, gagal, dibatalkan, maupun JSON invalid,
+      // supaya proses import berikutnya tidak salah replace draft.
+      activeImportTargetId = null;
     }
   };
   reader.readAsText(file);
 }
 
-// Inisialisasi tombol Save
-saveBtn.onclick = async () => {
-  const name = await showCustomDialog('prompt', 'Masukkan nama untuk draft ini:');
-  if (!name) {
-    await showCustomDialog('alert', 'Nama tidak boleh kosong!');
-    return;
+if (saveBtn) {
+  saveBtn.onclick = async () => {
+    const name = await showCustomDialog('prompt', 'Masukkan nama untuk draft ini:');
+    if (!name) {
+      await showCustomDialog('alert', 'Nama tidak boleh kosong!');
+      return;
+    }
+    const formData = getFormData();
+    const draftToSave = { name, timestamp: Date.now(), data: formData };
+    try {
+      await dbManager.saveDraft(draftToSave);
+      showToast(`Draft "${name}" tersimpan!`, 'success');
+      refreshDraftsList();
+    } catch (err) {
+      console.error('Failed to save draft:', err);
+      showToast('Gagal menyimpan draft.', 'error');
+    }
+  };
+}
+
+// =====================================================================
+// LOGIC: AUTO-SAVE (REFINED VERSION)
+// =====================================================================
+
+function debounce(func, delay) {
+  let timeoutId;
+  return function (...args) {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func.apply(this, args);
+    }, delay);
+  };
+}
+
+const AUTOSAVE_FIXED_ID = 'autosave-special-entry';
+
+/**
+ * TRACKER UNTUK NOTIFIKASI (Throttling)
+ * Kita mencatat kapan terakhir kali toast autosave muncul.
+ */
+let lastAutosaveToastTime = 0;
+
+async function performAutoSave() {
+  try {
+    const formData = getFormData();
+    const autoSaveDraft = {
+      id: AUTOSAVE_FIXED_ID,
+      name: 'Auto Save',
+      timestamp: Date.now(),
+      data: formData,
+    };
+
+    await dbManager.saveDraft(autoSaveDraft);
+
+    // --- LOGIKA NOTIFIKASI YANG SOPAN (THROTTLING) ---
+    const now = Date.now();
+    // Hanya tampilkan toast jika sudah lewat minimal 10 detik dari toast terakhir
+    if (now - lastAutosaveToastTime > 10000) {
+      showToast('Autosave berhasil!', 'info');
+      lastAutosaveToastTime = now; // Update waktu terakhir toast muncul
+    }
+    // -------------------------------------------------
+  } catch (err) {
+    console.error('Auto-save failed:', err);
   }
-  const formData = getFormData();
-  const draftToSave = { name, timestamp: Date.now(), data: formData };
-  await dbManager.saveDraft(draftToSave);
-  showToast(`Draft "${name}" tersimpan!`, 'success');
-  refreshDraftsList();
-};
+}
+
+const debouncedAutoSave = debounce(performAutoSave, 1000);
+
+async function loadAutosaveIfAvailable() {
+  try {
+    const drafts = await dbManager.getAllDrafts();
+    const autosaveEntry = drafts.find((d) => d.id === AUTOSAVE_FIXED_ID);
+
+    if (autosaveEntry) {
+      fillForm(autosaveEntry.data);
+      // Tambahkan ini agar kolom Update Number langsung muncul jika tipenya "Update"
+      if (typeof ProjectTypeLoader !== 'undefined') {
+        ProjectTypeLoader.updateVisibility();
+      }
+      // TAMBAHKAN INI: Trigger update manual setelah form diisi
+      if (typeof SubjectAutoFill !== 'undefined' && SubjectAutoFill.update) {
+        SubjectAutoFill.update();
+      }
+      console.log('%c[System] Autosave data loaded automatically. ✅', 'color: #10b981;');
+      showToast('Data autosave dimuat otomatis.', 'info');
+    }
+  } catch (err) {
+    console.error('Failed to load autosave:', err);
+  }
+}
 
 // Inisialisasi Aplikasi
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   refreshDraftsList();
+  await loadAutosaveIfAvailable();
 
-  // Toolbar Global Actions
   const btnImportGlobal = document.getElementById('btn-import-global');
   if (btnImportGlobal) {
     btnImportGlobal.onclick = () => {
-      activeImportTargetId = null; // Pastikan mode "Create New" jika klik dari toolbar
-      globalImportInput.click();
+      activeImportTargetId = null;
+      if (globalImportInput) globalImportInput.click();
     };
   }
 
-  // Listeners untuk input file
   if (globalImportInput) {
     globalImportInput.onchange = handleSmartImport;
+
+    // Sebagian browser modern memicu event 'cancel' pada <input type="file">
+    // saat dialog picker ditutup tanpa memilih file sama sekali (di kasus ini
+    // 'change' tidak pernah terpicu). Tangani supaya activeImportTargetId
+    // (yang di-set sesaat sebelum picker dibuka untuk mode replace) tidak
+    // nyangkut/stale. Assignment lewat properti (bukan addEventListener)
+    // supaya tidak ada listener yang menumpuk.
+    globalImportInput.oncancel = () => {
+      activeImportTargetId = null;
+    };
+  }
+
+  if (form) {
+    form.addEventListener('input', debouncedAutoSave);
   }
 });
 

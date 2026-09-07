@@ -406,10 +406,10 @@
                   ></button>
                 </div>
                 <select class="form-select" id="licensed-content" name="licensedContent">
-                  <option value="">Select Status</option>
-                  <option value="completed">Completed</option>
-                  <option value="in-progress">In Progress</option>
-                  <option value="blocked">Blocked</option>
+                  <option value="">-- Select Status --</option>
+                  <option value="failed">Failed</option>
+                  <option value="passed">Passed</option>
+                  <option value="n/a">N/A</option>
                 </select>
               </div>
 
@@ -443,10 +443,10 @@
                   ></button>
                 </div>
                 <select class="form-select" id="audio-credits" name="audioCredits">
-                  <option value="">Select Status</option>
-                  <option value="completed">Completed</option>
-                  <option value="in-progress">In Progress</option>
-                  <option value="blocked">Blocked</option>
+                  <option value="">-- Select Status --</option>
+                  <option value="failed">Failed</option>
+                  <option value="passed">Passed</option>
+                  <option value="n/a">N/A</option>
                 </select>
               </div>
 
@@ -485,11 +485,13 @@
                   ></button>
                 </div>
                 <select class="form-select" id="result-status" name="resultStatus">
-                  <option value="">Select Result</option>
-                  <option value="pass">Pass</option>
-                  <option value="fail">Fail</option>
-                  <option value="blocked">Blocked</option>
-                  <option value="needs-follow-up">Needs Follow-up</option>
+                  <option value="">-- Select Result --</option>
+                  <option value="failed">Failed</option>
+                  <option value="warning">Warning</option>
+                  <option value="passed">Passed</option>
+                  <option value="in progress">In Progress</option>
+                  <option value="not completed">Not Completed</option>
+                  <option value="n/a">N/A</option>
                 </select>
               </div>
 
@@ -531,47 +533,7 @@
               ></button>
             </legend>
 
-            <div class="checkbox-grid">
-              <label class="field-item">
-                <input type="checkbox" name="testers" value="tester-1" />
-                <span>Tester 1</span>
-              </label>
-
-              <label class="field-item">
-                <input type="checkbox" name="testers" value="tester-2" />
-                <span>Tester 2</span>
-              </label>
-
-              <label class="field-item">
-                <input type="checkbox" name="testers" value="tester-3" />
-                <span>Tester 3</span>
-              </label>
-
-              <label class="field-item">
-                <input type="checkbox" name="testers" value="tester-4" />
-                <span>Tester 4</span>
-              </label>
-
-              <label class="field-item">
-                <input type="checkbox" name="testers" value="tester-5" />
-                <span>Tester 5</span>
-              </label>
-
-              <label class="field-item">
-                <input type="checkbox" name="testers" value="tester-6" />
-                <span>Tester 6</span>
-              </label>
-
-              <label class="field-item">
-                <input type="checkbox" name="testers" value="tester-7" />
-                <span>Tester 7</span>
-              </label>
-
-              <label class="field-item">
-                <input type="checkbox" name="testers" value="tester-8" />
-                <span>Tester 8</span>
-              </label>
-            </div>
+            <div class="checkbox-grid" id="tester-list"></div>
           </fieldset>
 
           <!-- Sub-section: Report Content -->
@@ -1501,14 +1463,15 @@
     <!-- Wadah untuk notifikasi -->
 
     <script src="./vendor/tinymce/tinymce.min.js"></script>
+    <script src="./js/tester-loader.js"></script>
     <script src="./js/editor-init.js"></script>
     <script src="./js/navigate.js"></script>
     <script src="./js/theme-toggle.js"></script>
     <script src="./js/project-type-loader.js"></script>
     <script src="./js/project-name-loader.js"></script>
     <script src="./js/jira-api.js"></script>
-    <script src="./js/subject-auto-fill.js"></script>
     <script src="./js/info-dialog.js"></script>
-    <script type="module" src="./js/report-builder-logic.js"></script>
+    <script type="module" src="./js/report-builder-save-logic.js"></script>
+    <script src="./js/subject-auto-fill.js"></script>
   </body>
 </html>

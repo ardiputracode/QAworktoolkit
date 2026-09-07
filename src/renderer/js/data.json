@@ -13,5 +13,16 @@
     { "value": "FFP", "label": "FFP" }
   ],
 
+  "testers": [
+    "agung.prabawa@gameloft.com",
+    "ardi.putra@gameloft.com",
+    "aryudha.pramachdana@gameloft.com",
+    "bima.saputro@gameloft.com",
+    "gigih.prayogo@gameloft.com",
+    "harristhomas.nugroho@gameloft.com",
+    "kelvin.dennyswara@gameloft.com",
+    "muhammad.hasbi@gameloft.com"
+  ],
+
   "JIRA_BASE_URL": "https://gameloft.atlassian.net"
 }

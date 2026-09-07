@@ -190,6 +190,8 @@ const SubjectAutoFill = (function () {
       isInitialized = true;
       console.info('[SubjectAutoFill] 🚀 Module initialized with Sync States.');
     },
+    // TAMBAHKAN INI: Agar fungsi update bisa dipanggil dari file lain
+    update: _updateSubject,
   };
 })();
 

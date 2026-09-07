@@ -464,10 +464,12 @@ a {
 }
 
 .checkbox-grid .field-item {
-  display: flex; /* Perbaikan: Menambahkan display flex agar arah row berfungsi */
+  display: flex;
   flex-direction: row;
   align-items: center;
   gap: 0.75rem;
+  min-width: 0; /* Penting: item boleh mengecil mengikuti grid */
+
   background: var(--bg-surface-2);
   border: 1px solid var(--border-subtle);
   padding: 0.8rem 1rem;
@@ -524,6 +526,9 @@ a {
   font-weight: 500;
   color: var(--text-primary);
   user-select: none;
+
+  min-width: 0;
+  overflow-wrap: anywhere; /* Teks panjang turun ke baris berikutnya */
 }
 
 .checkbox-grid .field-item:has(input[type='checkbox']:checked) {

@@ -166,14 +166,30 @@ document.addEventListener('DOMContentLoaded', () => {
           );
 
           const element = editor.getElement();
-          if (element.hasAttribute('readonly')) {
+          if (element && element.hasAttribute('readonly')) {
             editor.mode.set('readonly');
           }
         });
 
-        // Penting agar data masuk ke textarea asli saat disimpan/dikirim
+        /**
+         * FIX UNTUK AUTOSAVE:
+         * Ketika ada perubahan di TinyMCE, kita harus mensinkronkan isinya ke textarea asli
+         * DAN secara manual memicu event 'input' agar form dapat mendeteksi perubahan tersebut.
+         *
+         * Catatan: event ini di-dispatch dengan { bubbles: true } pada textarea asli yang
+         * berada di dalam #report-builder-form, sehingga otomatis "naik" (bubbling) ke form
+         * dan memicu listener `form.addEventListener('input', debouncedAutoSave)` di
+         * report-builder-logic.js. Tidak ada perubahan lain yang diperlukan di file itu.
+         */
         editor.on('change input undo redo keyup', () => {
-          editor.save();
+          editor.save(); // Sinkronisasi konten ke <textarea> asli
+
+          // Trigger event 'input' secara manual pada textarea asli
+          const originalTextarea = editor.getElement();
+          if (originalTextarea) {
+            const event = new Event('input', { bubbles: true });
+            originalTextarea.dispatchEvent(event);
+          }
         });
 
         editor.on('remove', () => {
@@ -227,7 +243,9 @@ document.addEventListener('DOMContentLoaded', () => {
       editorInstances.forEach((editor) => {
         try {
           applyEditorTheme(editor);
-        } catch (e) {}
+        } catch (e) {
+          console.error('%c[Error] Failed to sync editor theme:', 'color: #ef4444;', e);
+        }
       });
     });
   }
