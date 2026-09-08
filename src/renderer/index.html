@@ -49,6 +49,15 @@
       </button>
     </header>
 
+    <div id="jira-connection-banner" class="connection-banner banner--warning" hidden>
+      <span class="banner-icon">⚠️</span>
+      <p class="banner-text">
+        Let's get you connected first! The tool needs your Jira email and token to be fully
+        functional.
+        <a href="#page-settings" data-page-link class="banner-link">Configure it here →</a>
+      </p>
+    </div>
+
     <!-- ======================= MAIN CONTENT ======================= -->
     <main id="main-content" class="app-main">
       <!-- --------------------- SECTION: HOME --------------------- -->
@@ -119,17 +128,6 @@
               style="width: auto"
               >Continue Editing →</a
             >
-          </div>
-        </div>
-
-        <!-- Setup Section -->
-        <div class="home-group">
-          <h3 class="section-label">Setup</h3>
-          <div class="card setup-card">
-            <ul class="setup-list">
-              <li><span class="check-mark">✓</span> Jira configured</li>
-              <li><span class="check-mark">✓</span> Open WebUI configured</li>
-            </ul>
           </div>
         </div>
 
@@ -332,7 +330,15 @@
                   id="total-issues"
                   name="totalIssues"
                   min="0"
+                  readonly
                 />
+                <p
+                  class="form-help jira-fetch-info"
+                  id="total-issues-fetch-info"
+                  style="margin: 4px 0 0; font-size: 0.8em; color: var(--text-muted)"
+                >
+                  Last fetched: <span id="total-issues-fetched-at">-</span>
+                </p>
               </div>
 
               <div class="form-field">
@@ -348,13 +354,28 @@
                     aria-label="Information for Total Issues Link"
                   ></button>
                 </div>
-                <input
-                  class="form-input"
-                  type="url"
-                  id="total-issues-link"
-                  name="totalIssuesLink"
-                  placeholder="https://example.com/issues"
-                />
+                <div style="display: flex; gap: 6px; align-items: center">
+                  <input
+                    class="form-input"
+                    type="url"
+                    id="total-issues-link"
+                    name="totalIssuesLink"
+                    placeholder="https://example.com/issues"
+                    style="flex: 1"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn--small"
+                    data-action="refresh-total-issues"
+                    data-issues-count-target="total-issues"
+                    data-issues-link-source="total-issues-link"
+                    data-issues-fetched-at-target="total-issues-fetched-at"
+                    title="Refresh Total Issues count from Jira"
+                    aria-label="Refresh Total Issues count from Jira"
+                  >
+                    🔄
+                  </button>
+                </div>
               </div>
 
               <div class="form-field">
@@ -376,7 +397,15 @@
                   id="major-issues"
                   name="majorIssues"
                   min="0"
+                  readonly
                 />
+                <p
+                  class="form-help jira-fetch-info"
+                  id="major-issues-fetch-info"
+                  style="margin: 4px 0 0; font-size: 0.8em; color: var(--text-muted)"
+                >
+                  Last fetched: <span id="major-issues-fetched-at">-</span>
+                </p>
               </div>
 
               <div class="form-field">
@@ -392,13 +421,28 @@
                     aria-label="Information for Major Issues Link"
                   ></button>
                 </div>
-                <input
-                  class="form-input"
-                  type="url"
-                  id="major-issues-link"
-                  name="majorIssuesLink"
-                  placeholder="https://example.com/major-issues"
-                />
+                <div style="display: flex; gap: 6px; align-items: center">
+                  <input
+                    class="form-input"
+                    type="url"
+                    id="major-issues-link"
+                    name="majorIssuesLink"
+                    placeholder="https://example.com/major-issues"
+                    style="flex: 1"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn--small"
+                    data-action="refresh-major-issues"
+                    data-issues-count-target="major-issues"
+                    data-issues-link-source="major-issues-link"
+                    data-issues-fetched-at-target="major-issues-fetched-at"
+                    title="Refresh Major Issues count from Jira"
+                    aria-label="Refresh Major Issues count from Jira"
+                  >
+                    🔄
+                  </button>
+                </div>
               </div>
 
               <div class="form-field">
@@ -416,9 +460,9 @@
                 </div>
                 <select class="form-select" id="licensed-content" name="licensedContent">
                   <option value="">-- Select Status --</option>
-                  <option value="failed">Failed</option>
-                  <option value="passed">Passed</option>
-                  <option value="n/a">N/A</option>
+                  <option value="Failed">Failed</option>
+                  <option value="Passed">Passed</option>
+                  <option value="N/A">N/A</option>
                 </select>
               </div>
 
@@ -453,9 +497,9 @@
                 </div>
                 <select class="form-select" id="audio-credits" name="audioCredits">
                   <option value="">-- Select Status --</option>
-                  <option value="failed">Failed</option>
-                  <option value="passed">Passed</option>
-                  <option value="n/a">N/A</option>
+                  <option value="Failed">Failed</option>
+                  <option value="Passed">Passed</option>
+                  <option value="N/A">N/A</option>
                 </select>
               </div>
 
@@ -495,12 +539,12 @@
                 </div>
                 <select class="form-select" id="result-status" name="resultStatus">
                   <option value="">-- Select Result --</option>
-                  <option value="failed">Failed</option>
-                  <option value="warning">Warning</option>
-                  <option value="passed">Passed</option>
-                  <option value="in progress">In Progress</option>
-                  <option value="not completed">Not Completed</option>
-                  <option value="n/a">N/A</option>
+                  <option value="Failed">Failed</option>
+                  <option value="Warning">Warning</option>
+                  <option value="Passed">Passed</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Not Completed">Not Completed</option>
+                  <option value="N/A">N/A</option>
                 </select>
               </div>
 
@@ -1478,9 +1522,11 @@
     <script src="./js/theme-toggle.js"></script>
     <script src="./js/project-type-loader.js"></script>
     <script src="./js/project-name-loader.js"></script>
-    <script src="./js/jira-api.js"></script>
+    <script type="module" src="./js/jira-api.js"></script>
     <script src="./js/info-dialog.js"></script>
     <script type="module" src="./js/report-builder-save-logic.js"></script>
     <script src="./js/subject-auto-fill.js"></script>
+    <script src="./js/email-preview.js"></script>
+    <script src="./js/copy-report.js"></script>
   </body>
 </html>

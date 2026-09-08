@@ -47,7 +47,7 @@ async function initInfoDialog() {
 
     // 3. Isi pesan berdasarkan key yang cocok
     const message = dialogInfoData[infoKey];
-    messageElement.textContent = message ? message : 'Informasi tidak tersedia.';
+    messageElement.innerHTML = message ? message : 'Informasi tidak tersedia.';
 
     // Logika tambahan: Jika tombolnya berkaitan dengan 'savedDraft', tampilkan input nama
     if (infoKey === 'promptSaveDraft') {

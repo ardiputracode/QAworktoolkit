@@ -1466,3 +1466,141 @@ body .tox .tox-selectfield select {
   opacity: 0;
   transform: translateX(20px);
 }
+
+/* Mengatur tampilan tombol saat dalam keadaan disabled */
+.btn:disabled {
+  opacity: 0.5; /* Membuatnya agak transparan */
+  cursor: not-allowed; /* Mengubah kursor menjadi tanda 'dilarang' saat diarahkan */
+  filter: grayscale(1); /* Membuat warna tombol menjadi abu-abu (grayscale) */
+  pointer-events: none; /* Memastikan tidak bisa menerima klik sama sekali */
+}
+
+/* ==========================================================================
+   CONNECTION BANNER (THEME-ADAPTED)
+   ========================================================================== */
+
+/* Styling untuk Banner Koneksi (Light Mode) */
+.connection-banner {
+  /* Menggunakan warna kuning/oranye peringatan yang lebih lembut namun jelas */
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.1) 100%);
+  color: #b45309; /* Warna teks kuning kecoklatan untuk kontras yang baik di light mode */
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.2); /* Border bawah senada dengan background */
+  font-size: 0.9rem;
+  width: 100%;
+
+  /* Efek Glassmorphism agar senada dengan .app-header */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  /* Transisi yang mengikuti variabel tema */
+  transition: all var(--transition-smooth);
+}
+
+/* Warna untuk mode gelap (Dark Mode - Obsidian Titanium) */
+[data-theme='dark'] .connection-banner {
+  /* Gradien gelap dengan sedikit hint kuning/emas */
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.15) 0%, rgba(180, 83, 9, 0.1) 100%);
+  color: #fde68a; /* Warna teks kuning pastel terang untuk kontras di dark mode */
+  border-bottom: 1px solid rgba(251, 191, 36, 0.15);
+}
+
+.banner-icon {
+  font-size: 1.15rem;
+  /* Tambahan sedikit efek glow pada icon untuk menarik perhatian secara halus */
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+[data-theme='dark'] .banner-icon {
+  filter: drop-shadow(0 2px 4px rgba(253, 230, 138, 0.2));
+}
+
+.banner-text {
+  margin: 0;
+  font-weight: 600; /* Disesuaikan dengan ketebalan teks label/header di tema */
+  letter-spacing: -0.01em; /* Mengikuti gaya tipografi tema */
+}
+
+/* Menghilangkan banner saat tidak diperlukan */
+.connection-banner[hidden] {
+  display: none !important; /* Gunakan !important untuk memastikan override jika ada konflik */
+}
+
+/* ==========================================================================
+   BANNER LINK (THEME-ADAPTED)
+   ========================================================================== */
+
+/* Styling untuk Link di dalam Banner */
+.banner-link {
+  color: inherit;
+
+  /* Styling garis bawah yang lebih modern */
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: rgba(180, 83, 9, 0.4); /* Garis bawah sedikit transparan */
+
+  font-weight: 600; /* Menggunakan ketebalan 600 agar seimbang dengan teks banner */
+  margin-left: 8px;
+
+  /* Padding dan radius disiapkan untuk efek background saat hover */
+  padding: 2px 8px;
+  border-radius: var(--radius-sm); /* Mengikuti lengkungan 6px dari tema */
+
+  /* Menggunakan kecepatan transisi bawaan tema (150ms) */
+  transition: all var(--transition-fast);
+}
+
+/* Hover State - Light Mode */
+.banner-link:hover {
+  color: #92400e; /* Warna teks kuning/oranye gelap yang lebih tegas */
+  text-decoration-color: transparent; /* Menghilangkan garis bawah secara halus (fade) */
+  background-color: rgba(180, 83, 9, 0.12); /* Highlight background amber/oranye tipis */
+  transform: translateY(-1px); /* Efek melayang (lift) khas tombol di tema Anda */
+}
+
+/* Hover State saat di-klik (Active) */
+.banner-link:active {
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   DARK MODE (OBSIDIAN TITANIUM)
+   ========================================================================== */
+
+[data-theme='dark'] .banner-link {
+  color: #fde68a; /* Warna kuning pastel (sama dengan teks banner dark mode) */
+  text-decoration-color: rgba(253, 230, 138, 0.4);
+}
+
+[data-theme='dark'] .banner-link:hover {
+  color: #fef3c7; /* Warna teks menjadi lebih terang menyala saat hover */
+  background-color: rgba(29, 23, 1, 0); /* Highlight background kuning terang tipis */
+  text-decoration-color: transparent;
+}
+
+.form-input[readonly],
+.form-textarea[readonly] {
+  background-color: var(--bg-surface-2);
+  color: var(--text-muted);
+  border-color: var(--border-subtle);
+  cursor: not-allowed;
+}
+
+/* Opsional: Mencegah efek hover dan focus yang tidak perlu pada input readonly */
+.form-input[readonly]:hover,
+.form-textarea[readonly]:hover {
+  background-color: var(--bg-surface-2);
+  border-color: var(--border-subtle);
+}
+
+.form-input[readonly]:focus,
+.form-textarea[readonly]:focus {
+  border-color: var(--border-subtle);
+  box-shadow: none;
+  background-color: var(--bg-surface-2);
+}

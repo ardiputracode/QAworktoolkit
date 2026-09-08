@@ -19,6 +19,13 @@ const dialogCancelBtn = document.getElementById('dialog-cancel-btn');
 const globalImportInput = document.getElementById('global-import-input');
 let activeImportTargetId = null; // Null jika ingin buat baru, berisi ID jika ingin replace
 
+// --- Elemen Clear Form ---
+// Cari tombol clear KHUSUS milik report-builder-form (bukan bug-report-form),
+// karena atribut data-action="clear-form" dipakai bersama di beberapa form.
+const clearFormBtn = document.querySelector(
+  '[data-action="clear-form"][data-form-id="report-builder-form"]'
+);
+
 /**
  * FUNGSI BARU: Memperbarui tampilan Home berdasarkan data autosave
  */
@@ -174,6 +181,7 @@ function fillForm(data) {
   }
   reconstructDynamicList('step-list', 'step-row-template', data.stepDescription);
   reconstructDynamicList('note-list', 'note-row-template', data.noteDetails);
+  form.dispatchEvent(new Event('input'));
 }
 
 function reconstructDynamicList(containerId, templateId, values) {
@@ -465,6 +473,65 @@ if (saveBtn) {
 }
 
 // =====================================================================
+// LOGIC: CLEAR FORM
+// =====================================================================
+
+/**
+ * FUNGSI: clearReportBuilderForm
+ * Mengosongkan SELURUH input user di report-builder-form, lalu:
+ * 1. Menyinkronkan ulang UI turunan (visibility Project Type & Subject Auto Fill
+ *    preview), supaya subject yang auto-generate ikut ter-reset ke kosong.
+ * 2. Memperbarui autosave secara langsung (bukan lewat debounce) supaya draft
+ *    autosave di DB dan tampilan "Continue Your Work" di Home ikut konsisten
+ *    dengan form yang sudah kosong.
+ *
+ * Catatan: form.reset() TIDAK menyentuh instance TinyMCE (karena textarea
+ * aslinya sudah di-hide oleh TinyMCE) dan TIDAK memicu event 'input'/'change',
+ * jadi keduanya harus ditangani manual di sini.
+ */
+async function clearReportBuilderForm() {
+  if (!form) return;
+
+  // 1. Reset semua native form control: text/number/url/date input, select,
+  //    textarea (yang tidak dikontrol TinyMCE), dan checkbox/radio bawaan.
+  form.reset();
+
+  // 2. Kosongkan seluruh TinyMCE editor yang menempel di textarea form ini.
+  form.querySelectorAll('textarea').forEach((textarea) => {
+    const editor = tinymce.get(textarea.id);
+    if (editor) editor.setContent('');
+  });
+
+  // 3. Jaga-jaga: pastikan semua checkbox testers benar-benar ter-uncheck.
+  form.querySelectorAll('input[name="testers"]').forEach((checkbox) => {
+    checkbox.checked = false;
+  });
+
+  // 4. Sinkronkan UI yang bergantung pada data form: visibility Project Type
+  //    field, dan yang paling penting, Subject Auto Fill (Monthly/Date/Week
+  //    subject preview) supaya ikut kosong begitu form dikosongkan.
+  syncDependentUI();
+
+  // 5. Simpan state kosong ini ke autosave SEKARANG JUGA (tidak menunggu
+  //    debounce 1 detik), supaya draft autosave & Home section langsung sinkron.
+  await performAutoSave();
+  form.dispatchEvent(new Event('input'));
+  showToast('Form berhasil dikosongkan.', 'success');
+}
+
+if (clearFormBtn) {
+  clearFormBtn.addEventListener('click', async () => {
+    const isConfirmed = await showCustomDialog(
+      'confirm',
+      'Kosongkan seluruh input di form ini? Autosave juga akan ikut diperbarui.'
+    );
+    if (isConfirmed) {
+      await clearReportBuilderForm();
+    }
+  });
+}
+
+// =====================================================================
 // LOGIC: AUTO-SAVE (REFINED VERSION)
 // =====================================================================
 
@@ -569,4 +636,4 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-export { fillForm, refreshDraftsList };
+export { fillForm, refreshDraftsList, clearReportBuilderForm };
