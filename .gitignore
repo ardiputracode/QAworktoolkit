@@ -26,3 +26,6 @@ Thumbs.db
 !.vscode/extensions.json
 
 .idea/
+
+src/main/main-obfuscated.js
+qa-work-toolkit-bbf3ac084c66.json

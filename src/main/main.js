@@ -1,6 +1,59 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
+
 const path = require('path');
+
 const fs = require('fs');
+
+const { google } = require('googleapis');
+
+/**
+ * GOOGLE SERVICE ACCOUNT CONFIGURATION
+ *
+ * Saat development:
+ * - Credential dibaca dari file .env di root project.
+ *
+ * Saat portable release:
+ * - Credential akan di-inject oleh build-script.js.
+ * - File .env tidak ikut dimasukkan ke aplikasi.
+ * - main.js production akan di-obfuscate menjadi main-obfuscated.js.
+ *
+ * Pada tahap ini Google Service Account baru disiapkan.
+ * Belum ada fungsi untuk mengambil data dari Google Sheets.
+ */
+
+if (!app.isPackaged) {
+  require('dotenv').config({
+    path: path.join(__dirname, '../../.env'),
+  });
+}
+
+const GOOGLE_CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL;
+
+const GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
+/**
+ * Membuat Google Authentication menggunakan Service Account.
+ *
+ * Fungsi ini belum melakukan request ke Google Sheets.
+ * Authentication baru akan digunakan ketika fitur Google Sheets
+ * ditambahkan nanti.
+ *
+ * Scope dibuat read-only agar aplikasi hanya memiliki izin
+ * membaca spreadsheet dan tidak dapat mengubah atau menghapus data.
+ */
+function createGoogleAuth() {
+  if (!GOOGLE_CLIENT_EMAIL || !GOOGLE_PRIVATE_KEY) {
+    throw new Error('Google Service Account credentials tidak ditemukan.');
+  }
+
+  return new google.auth.GoogleAuth({
+    credentials: {
+      client_email: GOOGLE_CLIENT_EMAIL,
+      private_key: GOOGLE_PRIVATE_KEY,
+    },
+    scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+  });
+}
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -21,6 +74,102 @@ function createWindow() {
 }
 
 /**
+ * [NEW] LOGIKA AMBIL DAFTAR TESTER DARI GOOGLE SHEETS (IPC HANDLER)
+ * Struktur Sheet: Kolom B berisi nama-nama Tester.
+ */
+ipcMain.handle('get-testers', async () => {
+  try {
+    const spreadsheetId = process.env.GOOGLE_SPREADSHEET_ID;
+
+    if (!spreadsheetId) {
+      throw new Error('GOOGLE_SPREADSHEET_ID tidak ditemukan di .env');
+    }
+
+    // KONFIGURASI (Sesuaikan jika nama tab bukan Sheet1)
+    const SHEET_NAME = 'Tester';
+    const range = `'${SHEET_NAME}'!B2:B`; // Ambil Kolom B mulai baris ke-2
+
+    const auth = createGoogleAuth();
+    const sheets = google.sheets({ version: 'v4', auth });
+
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range,
+    });
+
+    const rows = response.data.values;
+
+    if (!rows || rows.length === 0) {
+      return { success: true, data: [] };
+    }
+
+    // Transformasi baris menjadi array string sederhana: ["Tester A", "Tester B"]
+    const testers = rows.map((row) => row[0]?.trim()).filter((name) => name);
+
+    return { success: true, data: testers };
+  } catch (error) {
+    console.error('Error fetching testers from Sheets:', error);
+    return { success: false, message: error.message };
+  }
+});
+
+/**
+ * [FIXED] LOGIKA AMBIL DAFTAR PROYEK DARI GOOGLE SHEETS
+ */
+ipcMain.handle('get-project-names', async () => {
+  try {
+    const spreadsheetId = process.env.GOOGLE_SPREADSHEET_ID;
+
+    if (!spreadsheetId) {
+      throw new Error('GOOGLE_SPREADSHEET_ID tidak ditemukan di .env');
+    }
+
+    // --- KONFIGURASI SHEET (SESUAIKAN DI SINI) ---
+    const SHEET_NAME = 'Project info'; // <--- PASTIKAN INI SAMA PERSIS dengan nama tab di spreadsheet kamu!
+    // Jika nama tab adalah "Project List", tulis: const SHEET_NAME = 'Project List';
+
+    // Kita gunakan A2:A100 (memberi batas baris agar parser API lebih mudah)
+    const range = `'${SHEET_NAME}'!A2:A100`;
+    // ----------------------------------------------
+
+    const auth = createGoogleAuth();
+    const sheets = google.sheets({ version: 'v4', auth });
+
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range,
+    });
+
+    const rows = response.data.values;
+
+    // Jika tidak ada data (atau hanya header), kembalikan array kosong dengan sukses
+    if (!rows || rows.length === 0) {
+      return { success: true, data: [] };
+    }
+
+    // Transformasi data
+    const projectNames = rows
+      .map((row) => ({
+        label: row[0]?.trim(), // Gunakan trim() untuk hapus spasi tidak sengaja di spreadsheet
+        value: row[0]?.trim(),
+      }))
+      .filter((item) => item.label); // Filter agar baris kosong/null tidak masuk ke dropdown
+
+    return { success: true, data: projectNames };
+  } catch (error) {
+    console.error('Error fetching project names from Sheets:', error);
+    // Jika error karena range salah, berikan pesan yang lebih jelas di UI
+    if (error.message && error.message.includes('Unable to parse range')) {
+      return {
+        success: false,
+        message: `❌ Error: Nama Sheet tidak ditemukan atau salah format. Pastikan nama tab adalah '${SHEET_NAME}'`,
+      };
+    }
+    return { success: false, message: error.message };
+  }
+});
+
+/**
  * LOGIKA JIRA CONNECTION TEST (IPC HANDLER)
  */
 ipcMain.handle('test-jira-connection', async (event, { email, token }) => {
@@ -30,17 +179,25 @@ ipcMain.handle('test-jira-connection', async (event, { email, token }) => {
     const dataPath = path.join(__dirname, '../../src/renderer/js/data.json');
 
     if (!fs.existsSync(dataPath)) {
-      return { success: false, message: `❌ File tidak ditemukan di: ${dataPath}` };
+      return {
+        success: false,
+        message: `❌ File tidak ditemukan di: ${dataPath}`,
+      };
     }
 
     const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+
     const baseUrl = data.JIRA_BASE_URL;
 
     if (!baseUrl) {
-      return { success: false, message: '❌ JIRA_BASE_URL tidak ada di data.json' };
+      return {
+        success: false,
+        message: '❌ JIRA_BASE_URL tidak ada di data.json',
+      };
     }
 
     const apiUrl = `${baseUrl.replace(/\/$/, '')}/rest/api/3/myself`;
+
     const authString = Buffer.from(`${email}:${token}`).toString('base64');
 
     // Menggunakan fetch (Node.js 18+)
@@ -76,6 +233,7 @@ ipcMain.handle('test-jira-connection', async (event, { email, token }) => {
     }
   } catch (error) {
     console.error('Jira Test Error:', error);
+
     return {
       success: false,
       message: `❌ ERROR: ${error.message}`,
@@ -98,19 +256,27 @@ ipcMain.handle('test-jira-connection', async (event, { email, token }) => {
  */
 ipcMain.handle(
   'get-jira-issue-count',
+
   async (event, { email, token, siteBaseUrl, jql, filterId }) => {
     try {
       const dataPath = path.join(__dirname, '../../src/renderer/js/data.json');
 
       if (!fs.existsSync(dataPath)) {
-        return { success: false, message: `❌ File tidak ditemukan di: ${dataPath}` };
+        return {
+          success: false,
+          message: `❌ File tidak ditemukan di: ${dataPath}`,
+        };
       }
 
       const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+
       const baseUrl = data.JIRA_BASE_URL;
 
       if (!baseUrl) {
-        return { success: false, message: '❌ JIRA_BASE_URL tidak ada di data.json' };
+        return {
+          success: false,
+          message: '❌ JIRA_BASE_URL tidak ada di data.json',
+        };
       }
 
       const normalizedBaseUrl = baseUrl.replace(/\/$/, '');
@@ -120,7 +286,9 @@ ipcMain.handle(
       if (siteBaseUrl) {
         try {
           const configuredHost = new URL(normalizedBaseUrl).hostname;
+
           const filterHost = new URL(siteBaseUrl).hostname;
+
           if (configuredHost !== filterHost) {
             return {
               success: false,
@@ -154,6 +322,7 @@ ipcMain.handle(
         }
 
         const filterData = await filterResponse.json();
+
         finalJql = filterData.jql;
       }
 
@@ -187,9 +356,14 @@ ipcMain.handle(
       }
 
       const countData = await countResponse.json();
-      return { success: true, count: countData.count };
+
+      return {
+        success: true,
+        count: countData.count,
+      };
     } catch (error) {
       console.error('Jira Issue Count Error:', error);
+
       return {
         success: false,
         message: `❌ ERROR: ${error.message}`,
@@ -199,6 +373,7 @@ ipcMain.handle(
 );
 
 // --- Lifecycle App ---
+
 app.whenReady().then(() => {
   createWindow();
 

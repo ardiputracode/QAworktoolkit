@@ -2,9 +2,11 @@
   "name": "qaworktoolkit",
   "version": "0.1.5",
   "description": "QA Work Toolkit",
-  "main": "src/main/main.js",
+  "main": "src/main/main-obfuscated.js",
   "scripts": {
-    "start": "electron .",
+    "start": "electron src/main/main.js",
+    "build:security": "node build-script.js",
+    "preportable": "node build-script.js",
     "portable": "electron-builder --win portable",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
@@ -24,20 +26,32 @@
   "devDependencies": {
     "electron": "^30.0.0",
     "electron-builder": "^26.15.3",
+    "javascript-obfuscator": "^5.7.0",
     "prettier": "^3.9.6"
   },
   "build": {
     "appId": "com.qaworktoolkit.app",
     "productName": "QA Work Toolkit",
+    "asar": true,
     "directories": {
       "output": "dist"
     },
     "files": [
       "src/**/*",
+      "!src/main/main.js",
       "package.json"
     ],
     "win": {
-      "target": "portable"
+      "target": [
+        "portable"
+      ]
+    },
+    "portable": {
+      "artifactName": "${productName} Portable ${version}.${ext}"
     }
+  },
+  "dependencies": {
+    "dotenv": "^17.2.2",
+    "googleapis": "^178.1.1"
   }
 }
