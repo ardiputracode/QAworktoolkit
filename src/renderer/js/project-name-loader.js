@@ -2,7 +2,6 @@
  * project-name-loader.js
  * PROJECT NAME LOADER MODULE (GOOGLE SHEETS VERSION)
  */
-
 console.log(
   '%c[System] Project Name Loader Module: File Loaded ✅',
   'color: #0284c7; font-weight: bold;'
@@ -46,8 +45,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         '%c[Action] Project Names loaded from Google Sheets! 🚀',
         'color: #10b981; font-weight: bold;'
       );
+
+      // ✅ BARU: Notifikasi ke modul lain bahwa options sudah siap.
+      // Ini memungkinkan fillForm di report-builder-save-logic.js
+      // untuk set value dengan benar.
+      projectNameSelect.dispatchEvent(
+        new CustomEvent('project-names-ready', { bubbles: true })
+      );
     } else {
       console.warn('[Warning] Data format dari Sheets tidak valid ⚠️');
+      // Tetap fire event supaya fillForm tidak nunggu selamanya
+      projectNameSelect.dispatchEvent(
+        new CustomEvent('project-names-ready', { bubbles: true })
+      );
     }
   } catch (error) {
     console.error(
@@ -55,5 +65,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       'color: #ef4444; font-weight: bold;',
       error
     );
+    // Tetap fire event supaya fillForm tidak nunggu selamanya
+    const select = document.getElementById('project-name');
+    if (select) {
+      select.dispatchEvent(new CustomEvent('project-names-ready', { bubbles: true }));
+    }
   }
 });

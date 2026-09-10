@@ -148,6 +148,7 @@ function getFormData() {
     (cb) => cb.value
   );
   if (testers.length > 0) data.testers = testers;
+
   return data;
 }
 
@@ -165,6 +166,17 @@ function fillForm(data) {
     // kalau dijalankan pada RadioNodeList).
     if (element instanceof RadioNodeList) {
       element.value = data[key];
+      return;
+    }
+
+    // FIX RACE CONDITION: Skip field project-name di sini.
+    // Alasannya: <select> project-name di-populate secara async oleh
+    // project-name-loader.js (API Google Sheets). Jika fillForm dijalankan
+    // sebelum options tersedia, assignment .value akan diabaikan oleh browser
+    // karena tidak ada <option> yang cocok.
+    // Nilai project-name akan di-set terpisah oleh applyProjectNameValue()
+    // setelah event 'project-names-ready' terpicu.
+    if (element.id === 'project-name') {
       return;
     }
 
@@ -216,6 +228,66 @@ function syncDependentUI() {
 
   if (typeof SubjectAutoFill !== 'undefined' && SubjectAutoFill.update) {
     SubjectAutoFill.update();
+  }
+}
+
+// =====================================================================
+// FIX RACE CONDITION: WAIT FOR PROJECT NAMES
+// =====================================================================
+
+/**
+ * HELPER: Promise yang resolve ketika event 'project-names-ready' terpicu
+ * oleh project-name-loader.js.
+ *
+ * Jika options sudah lebih dulu load (misal karena loader selesai lebih cepat
+ * dari init autosave), langsung resolve tanpa menunggu.
+ * Jika API gagal, tetap resolve (fallback timeout 8 detik) supaya aplikasi
+ * tidak stuck selamanya.
+ */
+function waitForProjectNamesReady() {
+  const select = document.getElementById('project-name');
+  if (!select) return Promise.resolve();
+
+  // Cek apakah sudah ada options selain placeholder.
+  // > 1 karena ada 1 option default "-- Select Project --"
+  if (select.options.length > 1) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    const timeout = setTimeout(resolve, 8000); // fallback: max tunggu 8 detik
+    const handler = () => {
+      clearTimeout(timeout);
+      resolve();
+    };
+    select.addEventListener('project-names-ready', handler, { once: true });
+  });
+}
+
+/**
+ * SET NILAI PROJECT NAME setelah options sudah tersedia di <select>.
+ * Dipanggil setelah waitForProjectNamesReady() resolve, memastikan
+ * <option> target sudah ada di DOM sebelum assignment .value.
+ *
+ * @param {string} savedValue - Value project name yang tersimpan di autosave/draft.
+ */
+function applyProjectNameValue(savedValue) {
+  const select = document.getElementById('project-name');
+  if (!select || !savedValue) return;
+
+  // Cari apakah option dengan value ini sudah ada di dropdown
+  const existingOption = Array.from(select.options).find((opt) => opt.value === savedValue);
+
+  if (existingOption) {
+    select.value = savedValue;
+    // Trigger event 'input' supaya debouncedAutoSave & SubjectAutoFill ikut sync
+    form.dispatchEvent(new Event('input'));
+    syncDependentUI();
+    console.log('[System] Project name value applied: ' + savedValue);
+  } else {
+    // Value dari autosave tidak ditemukan di daftar project
+    // (mungkin project dihapus dari Google Sheets)
+    console.warn(`[Warning] Project name "${savedValue}" tidak ditemukan di daftar options. Dropdown tetap kosong.`);
   }
 }
 
@@ -275,6 +347,10 @@ async function refreshDraftsList() {
       const isConfirmed = await showCustomDialog('confirm', `Buka draft "${draft.name}"?`);
       if (isConfirmed) {
         fillForm(draft.data);
+        // FIX: Set project name value setelah fillForm (options sudah ready saat user klik Open)
+        if (draft.data?.projectName) {
+          applyProjectNameValue(draft.data.projectName);
+        }
         syncDependentUI();
         showToast(`Draft "${draft.name}" berhasil dibuka!`, 'success');
       }
@@ -322,6 +398,7 @@ async function refreshDraftsList() {
     actionsDiv.appendChild(deleteBtn);
     actionsDiv.appendChild(exportBtn);
     actionsDiv.appendChild(importBtn);
+
     draftRow.appendChild(infoDiv);
     draftRow.appendChild(actionsDiv);
     draftsContainer.appendChild(draftRow);
@@ -449,6 +526,7 @@ async function handleSmartImport(event) {
       activeImportTargetId = null;
     }
   };
+
   reader.readAsText(file);
 }
 
@@ -459,8 +537,10 @@ if (saveBtn) {
       await showCustomDialog('alert', 'Nama tidak boleh kosong!');
       return;
     }
+
     const formData = getFormData();
     const draftToSave = { name, timestamp: Date.now(), data: formData };
+
     try {
       await dbManager.saveDraft(draftToSave);
       showToast(`Draft "${name}" tersimpan!`, 'success');
@@ -589,9 +669,16 @@ async function loadAutosaveIfAvailable() {
     if (autosaveEntry) {
       fillForm(autosaveEntry.data);
 
+      // FIX: Set project name value secara terpisah.
+      // fillForm() sengaja skip field project-name (lihat komentar di fillForm).
+      // Di sini kita set nilainya karena saat ini options sudah pasti tersedia
+      // (dijamin oleh await waitForProjectNamesReady() di init di bawah).
+      if (autosaveEntry.data?.projectName) {
+        applyProjectNameValue(autosaveEntry.data.projectName);
+      }
+
       // UPDATE DI SINI: Panggil fungsi update UI saat pertama kali load
       updateHomeSection(autosaveEntry);
-
       syncDependentUI();
       console.log('%c[System] Autosave data loaded automatically. ✅', 'color: #10b981;');
       showToast('Data autosave dimuat otomatis.', 'info');
@@ -607,6 +694,13 @@ async function loadAutosaveIfAvailable() {
 // Inisialisasi Aplikasi
 document.addEventListener('DOMContentLoaded', async () => {
   refreshDraftsList();
+
+  // FIX RACE CONDITION: Tunggu project name options ter-load dari Google Sheets
+  // SEBELUM load autosave. Jika tidak, fillForm() akan mencoba set .value pada
+  // <select> yang masih kosong (tidak ada <option>), dan browser akan mengabaikan
+  // assignment tersebut.
+  await waitForProjectNamesReady();
+
   await loadAutosaveIfAvailable();
 
   const btnImportGlobal = document.getElementById('btn-import-global');

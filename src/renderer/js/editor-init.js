@@ -35,8 +35,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       background-color: var(--bg-editor) !important;
       color: var(--text-editor) !important;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      font-size: 16px;
+
+      /* Font default editor menggunakan Verdana 12pt */
+      font-family: Verdana, Geneva, sans-serif;
+      font-size: 12pt;
+
       line-height: 1.55;
       margin: 1rem;
       -webkit-font-smoothing: antialiased;
@@ -57,24 +60,45 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     a { color: var(--link-color) !important; text-decoration: none; }
+
     blockquote {
       border-left: 4px solid var(--blockquote-border) !important;
-      margin: 0 0 1.5rem 0; padding: 0.5rem 1rem;
+      margin: 0 0 1.5rem 0;
+      padding: 0.5rem 1rem;
       color: var(--blockquote-text) !important;
-      font-style: italic; background: var(--blockquote-bg) !important;
+      font-style: italic;
+      background: var(--blockquote-bg) !important;
       border-radius: 0 8px 8px 0;
     }
 
     code {
-      background-color: var(--code-bg) !important; padding: 0.2rem 0.4rem;
-      border-radius: 4px; font-family: 'JetBrains Mono', monospace;
-      font-size: 0.9em; color: var(--link-color) !important;
+      background-color: var(--code-bg) !important;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9em;
+      color: var(--link-color) !important;
       border: 1px solid var(--code-border) !important;
     }
 
-    table { border-collapse: collapse; width: 100%; border-radius: 8px; overflow: hidden; }
-    table td, table th { border: 1px solid var(--table-border) !important; padding: 0.75rem; }
-    table th { background-color: var(--table-th-bg) !important; font-weight: 600; text-align: left; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    table td,
+    table th {
+      border: 1px solid var(--table-border) !important;
+      padding: 0.75rem;
+    }
+
+    table th {
+      background-color: var(--table-th-bg) !important;
+      font-weight: 600;
+      text-align: left;
+    }
   `;
 
   // Target ID dari file asli kamu
@@ -102,6 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function applyEditorTheme(editor) {
     const body = editor.getBody();
     if (!body) return;
+
     body.classList.toggle('dark-mode', isDarkTheme());
   }
 
@@ -112,7 +137,31 @@ document.addEventListener('DOMContentLoaded', () => {
       branding: false,
       selector: selector,
       height: 300,
+
+      /**
+       * KONFIGURASI FONT:
+       * - Verdana menjadi font utama/default.
+       * - Font berikut akan muncul pada menu Font Family di toolbar.
+       * - Fallback digunakan jika suatu font tidak tersedia pada sistem pengguna.
+       */
+      font_family_formats:
+        'Verdana=Verdana,Geneva,sans-serif;' +
+        'Aptos=Aptos,"Segoe UI",Arial,sans-serif;' +
+        'Arial=Arial,Helvetica,sans-serif;' +
+        'Calibri=Calibri,"Segoe UI",Arial,sans-serif;' +
+        'Segoe UI="Segoe UI",Arial,sans-serif;' +
+        'Tahoma=Tahoma,Arial,sans-serif;' +
+        'Times New Roman="Times New Roman",Times,serif;' +
+        'Courier New="Courier New",Courier,monospace',
+
+      /**
+       * Daftar ukuran font yang tersedia pada menu Font Size.
+       * Default editor tetap menggunakan 12pt dari tinyMceStyle.
+       */
+      font_size_formats: '8pt 9pt 10pt 11pt 12pt 14pt 16pt 18pt 20pt 24pt 28pt 32pt',
+
       menubar: 'file edit view insert format tools table help',
+
       plugins: [
         'advlist',
         'autoresize',
@@ -126,8 +175,15 @@ document.addEventListener('DOMContentLoaded', () => {
         'code',
         'wordcount',
       ],
+
+      /**
+       * Toolbar:
+       * - fontfamily = menu pemilihan jenis font.
+       * - fontsize = menu pemilihan ukuran font.
+       */
       toolbar:
-        'undo redo | blocks fontsize | forecolor backcolor | removeformat | bold italic underline | bullist numlist | outdent indent | alignleft aligncenter alignright alignjustify | quickimage table | emoticons | code',
+        'undo redo | blocks fontfamily fontsize | forecolor backcolor | removeformat | bold italic underline | bullist numlist | outdent indent | alignleft aligncenter alignright alignjustify | quickimage table | emoticons | code',
+
       toolbar_mode: 'sliding',
       skin: 'oxide',
       content_css: 'default',
@@ -136,6 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // --- BAGIAN PERBAIKAN (Sesuai Referensi Kamu) ---
       file_picker_types: 'image',
+
       file_picker_callback: function (callback) {
         const input = document.createElement('input');
         input.type = 'file';
@@ -146,12 +203,15 @@ document.addEventListener('DOMContentLoaded', () => {
           if (!file) return;
 
           const reader = new FileReader();
+
           reader.onload = () => {
             // Mengirimkan hasil ke callback agar dialog terisi otomatis
             callback(reader.result, { alt: file.name });
           };
+
           reader.readAsDataURL(file);
         };
+
         input.click();
       },
 
@@ -160,12 +220,14 @@ document.addEventListener('DOMContentLoaded', () => {
         editor.on('init', () => {
           editorInstances.add(editor);
           applyEditorTheme(editor);
+
           console.log(
             `%c[Action] TinyMCE Editor Ready: ${editor.id} ✅`,
             'color: #8b5cf6; font-weight: bold;'
           );
 
           const element = editor.getElement();
+
           if (element && element.hasAttribute('readonly')) {
             editor.mode.set('readonly');
           }
@@ -186,6 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           // Trigger event 'input' secara manual pada textarea asli
           const originalTextarea = editor.getElement();
+
           if (originalTextarea) {
             const event = new Event('input', { bubbles: true });
             originalTextarea.dispatchEvent(event);
@@ -200,6 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
         editor.ui.registry.addButton('quickimage', {
           icon: 'image',
           tooltip: 'Insert Image Fast',
+
           onAction() {
             const input = document.createElement('input');
             input.type = 'file';
@@ -210,11 +274,14 @@ document.addEventListener('DOMContentLoaded', () => {
               if (!file) return;
 
               const reader = new FileReader();
+
               reader.onload = () => {
                 editor.insertContent(`<img src="${reader.result}" alt="${file.name}" />`);
               };
+
               reader.readAsDataURL(file);
             };
+
             input.click();
           },
         });
@@ -235,11 +302,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- TAHAP 4: SINKRONISASI TEMA (MutationObserver) ---
   let syncScheduled = false;
+
   function syncAllEditorThemes() {
     if (syncScheduled) return;
+
     syncScheduled = true;
+
     requestAnimationFrame(() => {
       syncScheduled = false;
+
       editorInstances.forEach((editor) => {
         try {
           applyEditorTheme(editor);
@@ -256,5 +327,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme'],
+  });
 });
