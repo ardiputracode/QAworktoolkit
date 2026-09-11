@@ -140,7 +140,7 @@
 
       showStatus(
         statusElement,
-        'Copied! Paste di Outlook/Thunderbird untuk tampilan email, atau paste di Notepad untuk HTML code.'
+        'Copied! Paste it into Outlook using ‘Keep Source Formatting’ to preserve the original formatting.'
       );
     } catch (error) {
       try {

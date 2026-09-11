@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
          * dan memicu listener `form.addEventListener('input', debouncedAutoSave)` di
          * report-builder-logic.js. Tidak ada perubahan lain yang diperlukan di file itu.
          */
-        editor.on('change input undo redo keyup', () => {
+        editor.on('change input undo redo keyup SetContent', () => {
           editor.save(); // Sinkronisasi konten ke <textarea> asli
 
           // Trigger event 'input' secara manual pada textarea asli

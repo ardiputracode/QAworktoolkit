@@ -40,7 +40,14 @@ const ProjectTypeLoader = (function () {
   const _isUpdateType = (value) => {
     if (!value) return false;
     const val = value.toLowerCase().trim();
-    return val === 'update' || val === 'upd' || val.includes('update') || val.includes('upd');
+    return (
+      val === 'update' ||
+      val === 'upd' ||
+      val.includes('update') ||
+      val.includes('upd') ||
+      val.includes('exp') ||
+      val.includes('expansion')
+    );
   };
 
   /**

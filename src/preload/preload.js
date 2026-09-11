@@ -6,4 +6,5 @@ contextBridge.exposeInMainWorld('qaToolkit', {
   getJiraIssueCount: (payload) => ipcRenderer.invoke('get-jira-issue-count', payload),
   getProjectNames: () => ipcRenderer.invoke('get-project-names'),
   getTesters: () => ipcRenderer.invoke('get-testers'),
+  getQaLead: () => ipcRenderer.invoke('get-qa-lead'),
 });

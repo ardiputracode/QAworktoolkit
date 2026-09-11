@@ -74,6 +74,46 @@ function createWindow() {
 }
 
 /**
+ * [NEW] LOGIKA AMBIL QA LEAD DARI GOOGLE SHEETS (IPC HANDLER)
+ * Mengambil data dari sel A2 pada sheet tertentu.
+ */
+ipcMain.handle('get-qa-lead', async () => {
+  try {
+    const spreadsheetId = process.env.GOOGLE_SPREADSHEET_ID;
+
+    if (!spreadsheetId) {
+      throw new Error('GOOGLE_SPREADSHEET_ID tidak ditemukan di .env');
+    }
+
+    // --- KONFIGURASI ---
+    // Assumption: Nama sheet tempat menyimpan QA Lead adalah 'Settings'
+    const SHEET_NAME = 'Tester';
+    const range = `'${SHEET_NAME}'!A2`; // Hanya mengambil sel A2
+
+    const auth = createGoogleAuth();
+    const sheets = google.sheets({ version: 'v4', auth });
+
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range,
+    });
+
+    const rows = response.data.values;
+
+    // Jika sel kosong, kembalikan string kosong
+    if (!rows || !rows[0] || !rows[0][0]) {
+      return { success: true, data: '' };
+    }
+
+    // Kembalikan nilai dari A2
+    return { success: true, data: rows[0][0].trim() };
+  } catch (error) {
+    console.error('Error fetching QA Lead from Sheets:', error);
+    return { success: false, message: error.message };
+  }
+});
+
+/**
  * [NEW] LOGIKA AMBIL DAFTAR TESTER DARI GOOGLE SHEETS (IPC HANDLER)
  * Struktur Sheet: Kolom B berisi nama-nama Tester.
  */

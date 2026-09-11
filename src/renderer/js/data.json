@@ -1,27 +1,8 @@
 {
   "projectTypes": [
     { "value": "Creation", "label": "Creation" },
-    { "value": "UPD", "label": "Update" }
-  ],
-  "projectNames": [
-    { "value": "ALU", "label": "ALU" },
-    { "value": "APEX", "label": "APEX" },
-    { "value": "BMC", "label": "BMC" },
-    { "value": "DDV", "label": "DDV" },
-    { "value": "DM2", "label": "DM2" },
-    { "value": "DMK", "label": "DMK" },
-    { "value": "FFP", "label": "FFP" }
-  ],
-
-  "testers": [
-    "agung.prabawa@gameloft.com",
-    "ardi.putra@gameloft.com",
-    "aryudha.pramachdana@gameloft.com",
-    "bima.saputro@gameloft.com",
-    "gigih.prayogo@gameloft.com",
-    "harristhomas.nugroho@gameloft.com",
-    "kelvin.dennyswara@gameloft.com",
-    "muhammad.hasbi@gameloft.com"
+    { "value": "UPD", "label": "Update" },
+    { "value": "Expansion", "label": "Expansion" }
   ],
 
   "JIRA_BASE_URL": "https://gameloft.atlassian.net"
