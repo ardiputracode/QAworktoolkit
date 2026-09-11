@@ -40,10 +40,10 @@
 
     styles: {
       table:
-        'border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; ' + // Menghapus width 100% yang lama
+        'border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; ' +
         'width: ' +
         TABLE_WIDTH +
-        'px; table-layout: fixed; margin: 0 auto; ' + // FIX: table-layout:fixed — paksa Word patuh ke width kolom, bukan hitung ulang dari konten
+        'px; table-layout: fixed; margin: 0; ' + // UBAH: dari 'margin: 0 auto;' menjadi 'margin: 0;'
         'background-color: #ffffff; font-family: ' +
         FONT_STACK +
         '; font-size: 14px; line-height: 1.6; ' +
@@ -695,12 +695,13 @@
     if (body === '') return '';
 
     return (
-      // FIX: width tetap (bukan "100%") + align="center" —
-      // Word/Outlook mempertahankan atribut width numerik saat paste,
-      // sedangkan width="100%" dulu dikonversi jadi max-width yang diabaikan.
+      // FIX: width tetap (bukan "100%"). Atribut align sengaja DIHAPUS —
+      // align="left"/"right" pada <table> di Word/Outlook membuat tabel jadi
+      // floating element (mirip float:left), yang bikin intro/outro jadi
+      // nempel/nyamping. Tabel block biasa sudah rata kiri tanpa perlu align.
       '<table role="presentation" cellpadding="0" cellspacing="0" width="' +
       TABLE_WIDTH +
-      '" align="center" style="' +
+      '" style="' +
       CONFIG.styles.table +
       '">' +
       body +
@@ -715,13 +716,83 @@
   window.updateEmailPreview = function updateEmailPreview() {
     const container = document.getElementById(CONFIG.previewContainerId);
     if (!container) return;
+
     let html = '';
     try {
-      html = generateReportHTML(getFormDataForPreview());
+      const data = getFormDataForPreview();
+      const tableHtml = generateReportHTML(data);
+
+      // Jika tabel tidak kosong, kita buat wrapper dengan Intro dan Outro
+      if (tableHtml && !isEmptyValue(tableHtml)) {
+        const projectName = data.projectName || 'Project'; // Fallback jika nama proyek kosong
+        const formattedDate = formatDate(data.reportDate);
+
+        // Gaya untuk teks pembuka dan penutup agar konsisten dengan tabel
+        const textStyle =
+          'font-family: ' +
+          FONT_STACK +
+          '; font-size: 14px; color: ' +
+          CONTENT_COLOR +
+          '; line-height: 1.6;';
+
+        // 1. Konstruksi Intro
+        // CATATAN: margin/padding di <div> TIDAK dipakai lagi di sini — terbukti
+        // selalu dibuang Word (baik shorthand maupun longhand) saat <div> diubah
+        // jadi <p class=MsoNormal>. Jarak vertikal sekarang ditangani oleh
+        // createSpacerBlock() (tabel spacer) di bawah, bukan margin/padding.
+        const introHtml =
+          '<div style="' +
+          textStyle +
+          '">' +
+          'Hello everyone,<br><br>' +
+          'Please find below the <strong>' +
+          escapeHTML(projectName) +
+          '</strong> report for ' +
+          formattedDate +
+          ' :<br>' +
+          '</div>';
+
+        // 2. Konstruksi Outro
+        const outroHtml =
+          '<div style="' +
+          textStyle +
+          '">' +
+          'That concludes the <strong>' +
+          escapeHTML(projectName) +
+          '</strong> report.<br><br>' +
+          'Thank you for taking a moment to review the progress.<br><br>' +
+          'Best Regards,' +
+          '</div>';
+
+        /**
+         * HELPER: Tabel spacer 1 baris 1 kolom dengan tinggi tetap.
+         * Dipakai untuk jarak vertikal antar section, menggantikan
+         * margin/padding di <div> yang terbukti selalu dibuang Word.
+         * Polanya sama persis dengan createSpacerRow() di dalam tabel utama,
+         * yang sudah terbukti bertahan setelah paste ke Outlook.
+         */
+        function createSpacerBlock(heightPx) {
+          return (
+            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse;">' +
+            '<tr><td style="height: ' +
+            heightPx +
+            'px; line-height: ' +
+            heightPx +
+            'px; font-size: 1px; mso-line-height-rule: exactly;">&nbsp;</td></tr>' +
+            '</table>'
+          );
+        }
+
+        // Gabungkan semuanya: Intro + Spacer + Tabel + Spacer + Outro
+        html = introHtml + createSpacerBlock(20) + tableHtml + createSpacerBlock(20) + outroHtml;
+      } else {
+        html = ''; // Jika tabel kosong, biarkan html kosong untuk memicu placeholder
+      }
     } catch (err) {
       console.error('[email-preview] Gagal membuat preview:', err);
       return;
     }
+
     if (html) {
       container.innerHTML = html;
     } else {

@@ -1,6 +1,6 @@
 {
   "name": "qaworktoolkit",
-  "version": "0.1.5",
+  "version": "0.1.8",
   "description": "QA Work Toolkit",
   "main": "src/main/main-obfuscated.js",
   "scripts": {
