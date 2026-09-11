@@ -144,10 +144,16 @@ function getFormData() {
     if (editor) data[textarea.name] = editor.getContent();
   });
 
+  // Ambil seluruh tester yang sedang dicentang dan simpan sebagai array.
+  // Bagian ini sengaja dilakukan terpisah dari FormData supaya beberapa
+  // checkbox dengan name="testers" tidak hanya menyimpan value terakhir.
   const testers = Array.from(form.querySelectorAll('input[name="testers"]:checked')).map(
     (cb) => cb.value
   );
-  if (testers.length > 0) data.testers = testers;
+
+  if (testers.length > 0) {
+    data.testers = testers;
+  }
 
   return data;
 }
@@ -156,9 +162,13 @@ function fillForm(data) {
   if (!form || !data) return;
 
   form.reset();
+
   Object.keys(data).forEach((key) => {
     const element = form.elements[key];
-    if (!element || key === 'stepDescription' || key === 'noteDetails' || key === 'testers') return;
+
+    if (!element || key === 'stepDescription' || key === 'noteDetails' || key === 'testers') {
+      return;
+    }
 
     // FIX: form.elements[key] bisa berupa RadioNodeList kalau key adalah radio group.
     // RadioNodeList tidak punya .id seperti element biasa, jadi harus ditangani
@@ -181,18 +191,38 @@ function fillForm(data) {
     }
 
     const editor = tinymce.get(element.id);
-    if (editor) editor.setContent(data[key]);
-    else if (element.type !== 'checkbox') element.value = data[key];
+
+    if (editor) {
+      editor.setContent(data[key]);
+    } else if (element.type !== 'checkbox') {
+      element.value = data[key];
+    }
   });
 
-  if (data.testers && Array.isArray(data.testers)) {
-    data.testers.forEach((val) => {
-      const cb = form.querySelector(`input[name="testers"][value="${val}"]`);
-      if (cb) cb.checked = true;
+  // FIX TESTER RESTORE:
+  // Checkbox tester dibuat secara dinamis oleh tester-loader.js.
+  // Pada proses startup, fillForm() hanya dipanggil setelah event
+  // "testers-ready", sehingga seluruh checkbox sudah tersedia di DOM.
+  //
+  // Gunakan Set + iterasi checkbox daripada membangun CSS selector dari value.
+  // Cara ini lebih aman jika nama tester mengandung tanda kutip atau karakter
+  // khusus lain yang dapat membuat selector CSS menjadi tidak valid.
+  if (Array.isArray(data.testers)) {
+    const savedTesters = new Set(data.testers);
+
+    form.querySelectorAll('input[name="testers"]').forEach((checkbox) => {
+      checkbox.checked = savedTesters.has(checkbox.value);
+    });
+  } else {
+    // Jika draft tidak mempunyai data tester, pastikan semuanya tetap kosong.
+    form.querySelectorAll('input[name="testers"]').forEach((checkbox) => {
+      checkbox.checked = false;
     });
   }
+
   reconstructDynamicList('step-list', 'step-row-template', data.stepDescription);
   reconstructDynamicList('note-list', 'note-row-template', data.noteDetails);
+
   form.dispatchEvent(new Event('input'));
 }
 
@@ -255,12 +285,21 @@ function waitForProjectNamesReady() {
   }
 
   return new Promise((resolve) => {
-    const timeout = setTimeout(resolve, 8000); // fallback: max tunggu 8 detik
     const handler = () => {
       clearTimeout(timeout);
       resolve();
     };
-    select.addEventListener('project-names-ready', handler, { once: true });
+
+    // Fallback: maksimum tunggu 8 detik agar aplikasi tidak stuck
+    // jika API atau loader project name gagal.
+    const timeout = setTimeout(() => {
+      select.removeEventListener('project-names-ready', handler);
+      resolve();
+    }, 8000);
+
+    select.addEventListener('project-names-ready', handler, {
+      once: true,
+    });
   });
 }
 
@@ -280,15 +319,71 @@ function applyProjectNameValue(savedValue) {
 
   if (existingOption) {
     select.value = savedValue;
+
     // Trigger event 'input' supaya debouncedAutoSave & SubjectAutoFill ikut sync
     form.dispatchEvent(new Event('input'));
+
     syncDependentUI();
+
     console.log('[System] Project name value applied: ' + savedValue);
   } else {
     // Value dari autosave tidak ditemukan di daftar project
     // (mungkin project dihapus dari Google Sheets)
-    console.warn(`[Warning] Project name "${savedValue}" tidak ditemukan di daftar options. Dropdown tetap kosong.`);
+    console.warn(
+      `[Warning] Project name "${savedValue}" tidak ditemukan di daftar options. Dropdown tetap kosong.`
+    );
   }
+}
+
+// =====================================================================
+// FIX RACE CONDITION: WAIT FOR TESTERS
+// =====================================================================
+
+/**
+ * HELPER: Menunggu sampai tester-loader.js selesai mengambil daftar tester
+ * dari Google Sheets dan seluruh checkbox tester sudah tersedia di DOM.
+ *
+ * tester-loader.js akan:
+ * 1. Menambahkan data-testers-ready="true" pada #tester-list.
+ * 2. Mengirim event global "testers-ready".
+ *
+ * Dataset digunakan untuk menangani kasus ketika tester sudah selesai dimuat
+ * SEBELUM listener ini dipasang.
+ *
+ * Event digunakan untuk menangani kasus ketika proses loading tester masih
+ * berlangsung ketika fungsi ini dipanggil.
+ *
+ * Terdapat fallback timeout 8 detik agar proses startup aplikasi tidak
+ * terhenti selamanya jika loader tester mengalami masalah.
+ */
+function waitForTestersReady() {
+  const container = document.getElementById('tester-list');
+
+  if (!container) {
+    return Promise.resolve();
+  }
+
+  // Tester sudah selesai dimuat sebelum fungsi ini dipanggil.
+  if (container.dataset.testersReady === 'true') {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    const handler = () => {
+      clearTimeout(timeout);
+      resolve();
+    };
+
+    // Fallback: maksimum tunggu 8 detik.
+    const timeout = setTimeout(() => {
+      document.removeEventListener('testers-ready', handler);
+      resolve();
+    }, 8000);
+
+    document.addEventListener('testers-ready', handler, {
+      once: true,
+    });
+  });
 }
 
 // --- UI HANDLERS ---
@@ -297,6 +392,7 @@ async function refreshDraftsList() {
   if (!draftsContainer) return;
 
   let drafts;
+
   try {
     drafts = await dbManager.getAllDrafts();
   } catch (err) {
@@ -343,15 +439,29 @@ async function refreshDraftsList() {
     loadBtn.type = 'button';
     loadBtn.className = 'btn btn--primary btn--toolbar-small';
     loadBtn.textContent = '📝 Open';
+
     loadBtn.onclick = async () => {
       const isConfirmed = await showCustomDialog('confirm', `Buka draft "${draft.name}"?`);
+
       if (isConfirmed) {
+        // Pastikan seluruh field yang dibuat secara async sudah tersedia
+        // sebelum data draft dimasukkan ke form.
+        //
+        // Ini juga membuat restore tester pada manual draft tetap aman
+        // apabila user membuka draft sangat cepat setelah aplikasi dimulai.
+        await Promise.all([waitForProjectNamesReady(), waitForTestersReady()]);
+
         fillForm(draft.data);
-        // FIX: Set project name value setelah fillForm (options sudah ready saat user klik Open)
+
+        // FIX: Set project name value setelah fillForm.
+        // Project name dibuat secara async sehingga nilainya diterapkan
+        // setelah options sudah benar-benar tersedia.
         if (draft.data?.projectName) {
           applyProjectNameValue(draft.data.projectName);
         }
+
         syncDependentUI();
+
         showToast(`Draft "${draft.name}" berhasil dibuka!`, 'success');
       }
     };
@@ -361,8 +471,10 @@ async function refreshDraftsList() {
     deleteBtn.type = 'button';
     deleteBtn.className = 'btn btn--danger btn--toolbar-small';
     deleteBtn.textContent = '🧹 Delete';
+
     deleteBtn.onclick = async () => {
       const isConfirmed = await showCustomDialog('confirm', `Hapus draft "${draft.name}"?`);
+
       if (isConfirmed) {
         try {
           await dbManager.deleteDraft(draft.id);
@@ -389,9 +501,13 @@ async function refreshDraftsList() {
     importBtn.className = 'btn btn--primary btn--toolbar-small';
     importBtn.textContent = '📥 Import';
     importBtn.title = 'Import & Replace this specific draft';
+
     importBtn.onclick = () => {
       activeImportTargetId = draft.id;
-      if (globalImportInput) globalImportInput.click();
+
+      if (globalImportInput) {
+        globalImportInput.click();
+      }
     };
 
     actionsDiv.appendChild(loadBtn);
@@ -401,6 +517,7 @@ async function refreshDraftsList() {
 
     draftRow.appendChild(infoDiv);
     draftRow.appendChild(actionsDiv);
+
     draftsContainer.appendChild(draftRow);
   });
 }
@@ -411,6 +528,7 @@ async function refreshDraftsList() {
 
 async function handleExportSingle(draft) {
   const content = JSON.stringify(draft, null, 2);
+
   // Sanitasi whitespace + karakter yang tidak valid untuk nama file Windows: < > : " / \ | ? *
   const safeName = draft.name.replace(/\s+/g, '_').replace(/[<>:"/\\|?*]/g, '');
   const fileName = `${safeName}_export.json`;
@@ -419,11 +537,21 @@ async function handleExportSingle(draft) {
     try {
       const fileHandle = await window.showSaveFilePicker({
         suggestedName: fileName,
-        types: [{ description: 'JSON File', accept: { 'application/json': ['.json'] } }],
+        types: [
+          {
+            description: 'JSON File',
+            accept: {
+              'application/json': ['.json'],
+            },
+          },
+        ],
       });
+
       const writable = await fileHandle.createWritable();
+
       await writable.write(content);
       await writable.close();
+
       showToast(`Draft "${draft.name}" berhasil diekspor!`, 'success');
     } catch (err) {
       if (err.name === 'AbortError') {
@@ -434,19 +562,27 @@ async function handleExportSingle(draft) {
       }
     }
   } else {
-    const blob = new Blob([content], { type: 'application/json' });
+    const blob = new Blob([content], {
+      type: 'application/json',
+    });
+
     const url = URL.createObjectURL(blob);
+
     const link = document.createElement('a');
     link.href = url;
     link.download = fileName;
+
     link.click();
+
     URL.revokeObjectURL(url);
+
     showToast(`Proses ekspor "${draft.name}" dimulai...`, 'info');
   }
 }
 
 async function handleSmartImport(event) {
   const file = event.target.files[0];
+
   if (!file) {
     // Tidak ada file terpilih (mis. beberapa browser tetap memicu 'change' dengan
     // FileList kosong saat dialog dibatalkan) -> pastikan target replace direset
@@ -454,6 +590,7 @@ async function handleSmartImport(event) {
     activeImportTargetId = null;
     return;
   }
+
   event.target.value = '';
 
   const reader = new FileReader();
@@ -469,6 +606,7 @@ async function handleSmartImport(event) {
   reader.onload = async (e) => {
     try {
       let importedData;
+
       try {
         importedData = JSON.parse(e.target.result);
       } catch (jsonErr) {
@@ -501,7 +639,11 @@ async function handleSmartImport(event) {
 
       if (isConfirmed) {
         const newDraft = {
-          ...(isReplaceMode ? { id: activeImportTargetId } : {}),
+          ...(isReplaceMode
+            ? {
+                id: activeImportTargetId,
+              }
+            : {}),
           name: importedData.name,
           timestamp: Date.now(),
           data: importedData.data,
@@ -509,9 +651,11 @@ async function handleSmartImport(event) {
 
         try {
           await dbManager.saveDraft(newDraft);
+
           showToast(`Berhasil! Draft "${newDraft.name}" diproses.`, 'success');
         } catch (dbErr) {
           console.error('Failed to save imported draft:', dbErr);
+
           throw new Error(`Gagal menyimpan ke database: ${dbErr.message}`);
         }
 
@@ -533,17 +677,25 @@ async function handleSmartImport(event) {
 if (saveBtn) {
   saveBtn.onclick = async () => {
     const name = await showCustomDialog('prompt', 'Masukkan nama untuk draft ini:');
+
     if (!name) {
       await showCustomDialog('alert', 'Nama tidak boleh kosong!');
       return;
     }
 
     const formData = getFormData();
-    const draftToSave = { name, timestamp: Date.now(), data: formData };
+
+    const draftToSave = {
+      name,
+      timestamp: Date.now(),
+      data: formData,
+    };
 
     try {
       await dbManager.saveDraft(draftToSave);
+
       showToast(`Draft "${name}" tersimpan!`, 'success');
+
       refreshDraftsList();
     } catch (err) {
       console.error('Failed to save draft:', err);
@@ -579,7 +731,10 @@ async function clearReportBuilderForm() {
   // 2. Kosongkan seluruh TinyMCE editor yang menempel di textarea form ini.
   form.querySelectorAll('textarea').forEach((textarea) => {
     const editor = tinymce.get(textarea.id);
-    if (editor) editor.setContent('');
+
+    if (editor) {
+      editor.setContent('');
+    }
   });
 
   // 3. Jaga-jaga: pastikan semua checkbox testers benar-benar ter-uncheck.
@@ -595,7 +750,9 @@ async function clearReportBuilderForm() {
   // 5. Simpan state kosong ini ke autosave SEKARANG JUGA (tidak menunggu
   //    debounce 1 detik), supaya draft autosave & Home section langsung sinkron.
   await performAutoSave();
+
   form.dispatchEvent(new Event('input'));
+
   showToast('Form berhasil dikosongkan.', 'success');
 }
 
@@ -605,6 +762,7 @@ if (clearFormBtn) {
       'confirm',
       'Kosongkan seluruh input di form ini? Autosave juga akan ikut diperbarui.'
     );
+
     if (isConfirmed) {
       await clearReportBuilderForm();
     }
@@ -617,8 +775,12 @@ if (clearFormBtn) {
 
 function debounce(func, delay) {
   let timeoutId;
+
   return function (...args) {
-    if (timeoutId) clearTimeout(timeoutId);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+
     timeoutId = setTimeout(() => {
       func.apply(this, args);
     }, delay);
@@ -637,6 +799,7 @@ let lastAutosaveToastTime = 0;
 async function performAutoSave() {
   try {
     const formData = getFormData();
+
     const autoSaveDraft = {
       id: AUTOSAVE_FIXED_ID,
       name: 'Auto Save',
@@ -650,6 +813,7 @@ async function performAutoSave() {
     updateHomeSection(autoSaveDraft);
 
     const now = Date.now();
+
     if (now - lastAutosaveToastTime > 10000) {
       showToast('Autosave berhasil!', 'info');
       lastAutosaveToastTime = now;
@@ -664,9 +828,13 @@ const debouncedAutoSave = debounce(performAutoSave, 1000);
 async function loadAutosaveIfAvailable() {
   try {
     const drafts = await dbManager.getAllDrafts();
+
     const autosaveEntry = drafts.find((d) => d.id === AUTOSAVE_FIXED_ID);
 
     if (autosaveEntry) {
+      // Pada titik ini project-name dan tester sudah ditunggu pada proses
+      // initialization di bawah, sehingga checkbox tester sudah tersedia
+      // sebelum fillForm() mencoba mengembalikan checked state.
       fillForm(autosaveEntry.data);
 
       // FIX: Set project name value secara terpisah.
@@ -679,8 +847,11 @@ async function loadAutosaveIfAvailable() {
 
       // UPDATE DI SINI: Panggil fungsi update UI saat pertama kali load
       updateHomeSection(autosaveEntry);
+
       syncDependentUI();
+
       console.log('%c[System] Autosave data loaded automatically. ✅', 'color: #10b981;');
+
       showToast('Data autosave dimuat otomatis.', 'info');
     } else {
       // Jika tidak ada autosave, reset tampilan home ke kosong
@@ -695,19 +866,35 @@ async function loadAutosaveIfAvailable() {
 document.addEventListener('DOMContentLoaded', async () => {
   refreshDraftsList();
 
-  // FIX RACE CONDITION: Tunggu project name options ter-load dari Google Sheets
-  // SEBELUM load autosave. Jika tidak, fillForm() akan mencoba set .value pada
-  // <select> yang masih kosong (tidak ada <option>), dan browser akan mengabaikan
-  // assignment tersebut.
-  await waitForProjectNamesReady();
+  // FIX RACE CONDITION:
+  // Tunggu semua field dinamis yang diperlukan untuk restore autosave.
+  //
+  // 1. Project Name:
+  //    Options <select> project-name diambil secara async dari Google Sheets.
+  //
+  // 2. Testers:
+  //    Checkbox tester juga dibuat secara async oleh tester-loader.js setelah
+  //    data tester berhasil diambil dari Google Sheets.
+  //
+  // Jika autosave dimuat sebelum checkbox tester selesai dibuat, fillForm()
+  // tidak akan menemukan checkbox tersebut dan tester yang tersimpan di
+  // IndexedDB tidak akan kembali ter-checklist.
+  //
+  // Promise.all membuat keduanya dapat dimuat secara paralel dan autosave
+  // baru dipulihkan ketika kedua proses tersebut sudah selesai.
+  await Promise.all([waitForProjectNamesReady(), waitForTestersReady()]);
 
   await loadAutosaveIfAvailable();
 
   const btnImportGlobal = document.getElementById('btn-import-global');
+
   if (btnImportGlobal) {
     btnImportGlobal.onclick = () => {
       activeImportTargetId = null;
-      if (globalImportInput) globalImportInput.click();
+
+      if (globalImportInput) {
+        globalImportInput.click();
+      }
     };
   }
 

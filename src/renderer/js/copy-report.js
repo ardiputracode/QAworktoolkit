@@ -10,7 +10,7 @@
  */
 
 (() => {
-  const STATUS_CLEAR_DELAY = 4000;
+  const STATUS_CLEAR_DELAY = 7000;
 
   // Simpan timer per status element agar tidak bertumpuk.
   const statusTimers = new WeakMap();
@@ -21,7 +21,7 @@
   const showStatus = (statusElement, message) => {
     if (!statusElement) return;
 
-    statusElement.textContent = message;
+    statusElement.innerHTML = message;
 
     const previousTimer = statusTimers.get(statusElement);
     if (previousTimer) {
@@ -29,7 +29,7 @@
     }
 
     const timer = setTimeout(() => {
-      statusElement.textContent = '';
+      statusElement.innerHTML = '';
     }, STATUS_CLEAR_DELAY);
 
     statusTimers.set(statusElement, timer);
@@ -140,7 +140,16 @@
 
       showStatus(
         statusElement,
-        'Copied! Paste it into Outlook using ‘Keep Source Formatting’ to preserve the original formatting.'
+        `
+    <strong>Copied!</strong> Paste into <strong>Outlook Web or Outlook App</strong> using
+    <strong>Keep Source Formatting</strong>.
+    <br>
+    <span class="paste-hint">
+      Right-click → Paste Options → <strong>Keep Source Formatting</strong>
+      <br>
+      💡 Tip: Set it as your default paste option for faster pasting next time.
+    </span>
+  `
       );
     } catch (error) {
       try {

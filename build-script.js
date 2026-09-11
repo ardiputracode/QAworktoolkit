@@ -125,6 +125,8 @@ const GOOGLE_CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL;
 
 const GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY;
 
+const GOOGLE_SPREADSHEET_ID = process.env.GOOGLE_SPREADSHEET_ID;
+
 /**
  * Validasi credential.
  *
@@ -139,8 +141,13 @@ if (!GOOGLE_PRIVATE_KEY) {
   failBuild('GOOGLE_PRIVATE_KEY tidak ditemukan di file .env.');
 }
 
+if (!GOOGLE_SPREADSHEET_ID) {
+  failBuild('GOOGLE_SPREADSHEET_ID tidak ditemukan di file .env.');
+}
+
 console.log('      ✓ GOOGLE_CLIENT_EMAIL ditemukan.');
 console.log('      ✓ GOOGLE_PRIVATE_KEY ditemukan.');
+console.log('      ✓ GOOGLE_SPREADSHEET_ID ditemukan.');
 
 /**
  * Jangan pernah mencetak nilai credential ke terminal.
@@ -224,13 +231,14 @@ if (fs.existsSync(OUTPUT_FILE)) {
  */
 const injectedCredentials = `
 /**
- * PRODUCTION CREDENTIALS
+ * PRODUCTION CONFIGURATION
  *
  * Generated automatically by build-script.js.
  * DO NOT EDIT MANUALLY.
  */
 process.env.GOOGLE_CLIENT_EMAIL = ${JSON.stringify(GOOGLE_CLIENT_EMAIL)};
 process.env.GOOGLE_PRIVATE_KEY = ${JSON.stringify(GOOGLE_PRIVATE_KEY)};
+process.env.GOOGLE_SPREADSHEET_ID = ${JSON.stringify(GOOGLE_SPREADSHEET_ID)};
 
 `;
 
