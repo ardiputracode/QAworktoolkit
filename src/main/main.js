@@ -1,26 +1,9 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
-
 const path = require('path');
-
 const fs = require('fs');
-
 const { google } = require('googleapis');
 
-/**
- * GOOGLE SERVICE ACCOUNT CONFIGURATION
- *
- * Saat development:
- * - Credential dibaca dari file .env di root project.
- *
- * Saat portable release:
- * - Credential akan di-inject oleh build-script.js.
- * - File .env tidak ikut dimasukkan ke aplikasi.
- * - main.js production akan di-obfuscate menjadi main-obfuscated.js.
- *
- * Pada tahap ini Google Service Account baru disiapkan.
- * Belum ada fungsi untuk mengambil data dari Google Sheets.
- */
-
+// --- CONFIGURATION & ENV ---
 if (!app.isPackaged) {
   require('dotenv').config({
     path: path.join(__dirname, '../../.env'),
@@ -28,8 +11,122 @@ if (!app.isPackaged) {
 }
 
 const GOOGLE_CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL;
-
 const GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+const OPEN_WEBUI_URL = process.env.OPEN_WEBUI_URL; // Di-inject saat build
+
+// --- HELPER: Google Auth ---
+function createGoogleAuth() {
+  if (!GOOGLE_CLIENT_EMAIL || !GOOGLE_PRIVATE_KEY) {
+    throw new Error('Google Service Account credentials tidak ditemukan.');
+  }
+  return new google.auth.GoogleAuth({
+    credentials: { client_email: GOOGLE_CLIENT_EMAIL, private_key: GOOGLE_PRIVATE_KEY },
+    scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+  });
+}
+
+// --- WINDOW MANAGEMENT ---
+function createWindow() {
+  const mainWindow = new BrowserWindow({
+    width: 1200,
+    height: 800,
+    minWidth: 900,
+    minHeight: 600,
+    webPreferences: {
+      preload: path.join(__dirname, '../preload/preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+}
+
+/**
+ * [NEW] LOGIKA AMBIL DAFTAR MODEL DARI OPEN WEBUI (IPC HANDLER)
+ */
+ipcMain.handle('get-openwebui-models', async (event, token) => {
+  try {
+    if (!OPEN_WEBUI_URL) throw new Error('URL tidak dikonfigurasi.');
+    if (!token) throw new Error('Token diperlukan untuk mengambil model.');
+
+    // Endpoint standar Open WebUI/OpenAI adalah /api/models
+    const apiUrl = `${OPEN_WEBUI_URL.replace(/\/$/, '')}/api/models`;
+
+    console.log(`[Main] Fetching models from: ${apiUrl}`);
+
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Gagal mengambil model (Status: ${response.status})`);
+    }
+
+    const data = await response.json();
+
+    // Struktur OpenAI/OpenWebUI biasanya: { data: [ { id: 'model-name', ... }, ... ] }
+    if (!data.data || !Array.isArray(data.data)) {
+      throw new Error('Format data model tidak sesuai.');
+    }
+
+    // Transformasi ke format label/value agar mudah digunakan di dropdown
+    const models = data.data.map((m) => ({
+      label: m.id, // Nama yang dilihat user (misal: "gpt-4o")
+      value: m.id, // Nilai yang dikirim ke server (misal: "gpt-4o")
+    }));
+
+    return { success: true, data: models };
+  } catch (error) {
+    console.error('Error fetching Open WebUI models:', error);
+    return { success: false, message: error.message };
+  }
+});
+
+// main.js
+
+// ... existing code ...
+
+// ============================================================
+// [FIXED] LOGIKA TEST KONEKSI OPEN WEBUI (IPC HANDLER)
+// ============================================================
+ipcMain.handle('test-openwebui', async (event, token) => {
+  try {
+    if (!OPEN_WEBUI_URL) throw new Error('URL Open WebUI tidak ditemukan dalam konfigurasi build.');
+    if (!token) throw new Error('API Token tidak boleh kosong.');
+
+    console.log(`[Main] Mengetes koneksi dengan endpoint terlindungi ke: ${OPEN_WEBUI_URL}`);
+
+    // [FIX] Jangan tembak URL utama, tembak /api/models atau /api/user agar token benar-benar divalidasi
+    const testApiUrl = `${OPEN_WEBUI_URL.replace(/\/$/, '')}/api/models`;
+
+    const response = await fetch(testApiUrl, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // Sekarang kita mengecek apakah token benar-benar bisa mengakses data model
+    if (response.ok) {
+      return { success: true, message: '✅ Connected to Open WebUI' };
+    } else if (response.status === 401 || response.status === 403) {
+      // Jika token salah, sekarang ini akan tertangkap dengan benar
+      return { success: false, message: `❌ Invalid Token (Status: ${response.status})` };
+    } else {
+      return { success: false, message: `❌ Server Error (Status: ${response.status})` };
+    }
+  } catch (error) {
+    console.error('Open WebUI Test Error:', error);
+    return { success: false, message: `❌ ERROR: ${error.message}` };
+  }
+});
+
+// ... rest of the code ...
 
 /**
  * Membuat Google Authentication menggunakan Service Account.

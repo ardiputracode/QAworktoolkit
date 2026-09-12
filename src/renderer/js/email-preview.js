@@ -55,20 +55,19 @@
         'background-color: #2E1065; color: #ffffff; padding: 12px 20px; ' +
         'font-size: 18px; font-weight: 700; text-align: left; font-family: ' +
         FONT_STACK +
-        '; line-height: 1.3;',
+        '; line-height: 24px; mso-line-height-rule: exactly;',
 
       projectSubHeader:
         'background-color: #4C1D95; color: #ffffff; padding: 8px 20px; ' +
         'font-size: 16px; font-weight: 400; text-align: left; font-family: ' +
         FONT_STACK +
-        '; line-height: 1.3;',
+        '; line-height: 20px; mso-line-height-rule: exactly;',
 
       dateSubHeader:
-        'background-color: #5B21B6; color: #ffffff; padding: 5px 20px; ' +
-        'border-bottom: 2px solid #ffffff; ' +
+        'background-color: #5B21B6; color: #ffffff; padding: 6px 20px; ' +
         'font-size: 12px; font-weight: 400; text-align: left; font-family: ' +
         FONT_STACK +
-        '; line-height: 1.3;',
+        '; line-height: 16px; mso-line-height-rule: exactly;',
 
       footer:
         'background-color: #2E1065; color: #2E1065; padding: 16px 20px; ' +
@@ -165,59 +164,75 @@
   function normalizeRichContent(html) {
     if (isEmptyValue(html)) return '';
     if (typeof window.DOMParser === 'undefined') return html;
+
     try {
       const doc = new window.DOMParser().parseFromString(html, 'text/html');
       const body = doc.body;
+
       if (!body) return html;
+
       Array.prototype.forEach.call(
         body.querySelectorAll('script, style, link, meta'),
         function (el) {
           if (el.parentNode) el.parentNode.removeChild(el);
         }
       );
+
       const hasBlock = body.querySelector(
         'p, div, ul, ol, table, h1, h2, h3, h4, h5, h6, blockquote, pre'
       );
+
       if (!hasBlock && body.textContent.trim() !== '') {
         body.innerHTML = '<p>' + body.innerHTML + '</p>';
       }
+
       const textSelectors = 'p, div, li, ul, ol, h1, h2, h3, h4, h5, h6, blockquote, pre, td, th';
+
       Array.prototype.forEach.call(body.querySelectorAll(textSelectors), function (el) {
         if (!el.style.fontFamily) el.style.fontFamily = FONT_STACK;
         if (!el.style.fontSize) el.style.fontSize = '14px';
         if (!el.style.lineHeight) el.style.lineHeight = '1.6';
         if (!el.style.color) el.style.color = CONTENT_COLOR;
       });
+
       const blockSelectors = 'p, div, h1, h2, h3, h4, h5, h6, blockquote, pre';
+
       Array.prototype.forEach.call(body.querySelectorAll(blockSelectors), function (el) {
         if (!el.style.margin) el.style.margin = '0 0 10px 0';
       });
+
       Array.prototype.forEach.call(body.querySelectorAll('ul, ol'), function (el) {
         if (!el.style.margin) el.style.margin = '0 0 10px 0';
         if (!el.style.padding) el.style.padding = '0 0 0 20px';
       });
+
       Array.prototype.forEach.call(body.querySelectorAll('li'), function (el) {
         if (!el.style.margin) el.style.margin = '0 0 4px 0';
       });
+
       Array.prototype.forEach.call(body.querySelectorAll('a'), function (el) {
         if (!el.style.color) el.style.color = '#0ea5e9';
         if (!el.style.textDecoration) el.style.textDecoration = 'none';
         if (!el.style.fontWeight) el.style.fontWeight = '500';
         if (!el.style.fontFamily) el.style.fontFamily = FONT_STACK;
       });
+
       Array.prototype.forEach.call(body.querySelectorAll('img'), function (el) {
         // FIX: Outlook/Word mengabaikan CSS max-width pada <img>, tapi tetap
         // membaca atribut width/height HTML asli (mis. 2048x597 dari screenshot).
         // Jadi atribut width harus dipaksa turun juga, bukan cuma lewat style.
         var MAX_IMG_WIDTH = TABLE_WIDTH - 40; // lebar tabel dikurangi padding kiri-kanan
         var currentWidth = parseInt(el.getAttribute('width'), 10) || el.naturalWidth || 0;
+
         if (!currentWidth || currentWidth > MAX_IMG_WIDTH) {
           el.removeAttribute('height'); // biar rasio ikut menyesuaikan otomatis
           el.setAttribute('width', String(MAX_IMG_WIDTH));
         }
+
         if (!el.style.maxWidth) el.style.maxWidth = '100%';
         if (!el.style.height) el.style.height = 'auto';
       });
+
       return body.innerHTML;
     } catch (err) {
       console.error('[email-preview] Gagal normalisasi konten:', err);
@@ -228,11 +243,13 @@
   /* ==========================================================================
      DATA EXTRACTION
   ========================================================================== */
-
   function getTinyMceContent(id) {
     if (!window.tinymce || typeof window.tinymce.get !== 'function') return '';
+
     const editor = window.tinymce.get(id);
+
     if (!editor || typeof editor.getContent !== 'function') return '';
+
     try {
       return editor.getContent() || '';
     } catch (err) {
@@ -242,24 +259,32 @@
 
   function getFormValue(id) {
     const element = document.getElementById(id);
+
     if (!element) return '';
+
     if (CONFIG.tinyMceIds.indexOf(id) !== -1) {
       return normalizeRichContent(getTinyMceContent(id));
     }
+
     if (element.tagName === 'SELECT') {
       const option = element.options[element.selectedIndex];
       return option && option.value !== '' ? option.text : '';
     }
+
     if (element.type === 'checkbox' || element.type === 'radio') {
       return element.checked ? element.value : '';
     }
+
     return typeof element.value === 'string' ? element.value : '';
   }
 
   function getCheckedTesters() {
     const form = document.getElementById(CONFIG.formId);
+
     if (!form) return '';
+
     const checked = form.querySelectorAll('input[name="testers"]:checked');
+
     return Array.prototype.map
       .call(checked, function (cb) {
         return cb.value;
@@ -307,7 +332,9 @@
 
   function createLinkHtml(url, text) {
     if (isEmptyValue(url)) return '';
+
     const label = isEmptyValue(text) ? url : text;
+
     return (
       '<a href="' +
       escapeHTML(url) +
@@ -321,9 +348,12 @@
 
   function createStatusBadge(status, note) {
     if (isEmptyValue(status)) return '';
+
     let bgColor = '#e5e7eb';
     let textColor = '#374151';
+
     const s = String(status).toLowerCase();
+
     if (s.indexOf('passed') !== -1) {
       bgColor = '#dcfce7';
       textColor = '#166534';
@@ -337,6 +367,7 @@
 
     const badgeTableStyle =
       'border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: auto; max-width: none;';
+
     const badgeCellStyle =
       'background-color: ' +
       bgColor +
@@ -345,12 +376,14 @@
       '; padding: 2px 8px; font-size: 13px; font-weight: 700; font-family: ' +
       FONT_STACK +
       '; line-height: 1.3; white-space: nowrap; text-align: left;';
+
     const noteCellStyle =
       'padding-left: 6px; color: #64748b; font-size: 13px; font-family: ' +
       FONT_STACK +
       '; line-height: 1.3; text-align: left;';
 
     const badgeCell = '<td style="' + badgeCellStyle + '">' + escapeHTML(status) + '</td>';
+
     if (!isEmptyValue(note)) {
       return (
         '<table cellpadding="0" cellspacing="0" border="0" width="1" style="' +
@@ -366,6 +399,7 @@
         '</table>'
       );
     }
+
     return (
       '<table cellpadding="0" cellspacing="0" border="0" width="1" style="' +
       badgeTableStyle +
@@ -379,6 +413,7 @@
 
   function createRow(label, valueHtml) {
     if (isEmptyValue(valueHtml)) return '';
+
     return (
       '<tr><td width="' +
       LABEL_WIDTH + // FIX: attribute HTML yang valid cuma "width", bukan "max-width" — samakan dengan style labelCell
@@ -410,6 +445,7 @@
   function createSpacerRow() {
     const spacerCellStyle =
       'line-height: 1px; font-size: 1px; mso-line-height-rule: exactly; padding: 0;';
+
     return (
       '<tr>' +
       '<td width="' +
@@ -433,36 +469,44 @@
   /** HELPER: Baris penuh tanpa label kiri */
   function createFullWidthRow(html) {
     if (isEmptyValue(html)) return '';
+
     return '<tr><td colspan="2" style="' + CONFIG.styles.valueCell + '">' + html + '</td></tr>';
   }
 
   /** HELPER: Judul Utama Tabel */
   function createTableHeader(text) {
     return (
-      '<tr><td colspan="2" style="' + CONFIG.styles.header + '">' + escapeHTML(text) + '</td></tr>'
+      '<tr bgcolor="#2E1065" style="background-color: #2E1065;">' +
+      '<td colspan="2" bgcolor="#2E1065" style="' +
+      CONFIG.styles.header +
+      '">' +
+      escapeHTML(text) +
+      '</td></tr>'
     );
   }
 
   /** HELPER: Sub-Header Proyek/Tanggal */
   function createProjectSubHeader(text) {
     return (
-      '<tr><td colspan="2" style="' +
+      '<tr bgcolor="#4C1D95" style="background-color: #4C1D95;">' +
+      '<td colspan="2" bgcolor="#4C1D95" style="' +
       CONFIG.styles.projectSubHeader +
       '">' +
       escapeHTML(text) +
       '</td></tr>'
     );
   }
+
   function createDateSubHeader(text) {
     return (
-      '<tr><td colspan="2" style="' +
+      '<tr bgcolor="#5B21B6" style="background-color: #5B21B6;">' +
+      '<td colspan="2" bgcolor="#5B21B6" style="' +
       CONFIG.styles.dateSubHeader +
       '">' +
       escapeHTML(text) +
       '</td></tr>'
     );
   }
-
   /* ==========================================================================
      SECTION HEADERS (CUSTOMIZABLE INDIVIDUALLY)
   ========================================================================== */
@@ -470,60 +514,67 @@
   // 1. Project Summary
   function createProjectSummaryHeader() {
     return (
-      '<tr><td colspan="2" style="background-color: #EDE9FE; padding: 12px 16px; font-size: 13px; font-weight: 700; color: #4C1D95; text-align: left; border-bottom: 2px solid #e1d8f5; font-family: ' +
+      '<tr bgcolor="#EDE9FE" style="background-color: #EDE9FE;">' +
+      '<td colspan="2" bgcolor="#EDE9FE" style="background-color: #EDE9FE; padding: 12px 16px; font-size: 13px; font-weight: 700; color: #4C1D95; text-align: left; border-bottom: 2px solid #e1d8f5; font-family: ' +
       FONT_STACK +
-      '; text-transform: uppercase;">PROJECT SUMMARY</td></tr>'
+      '; line-height: 18px; mso-line-height-rule: exactly; text-transform: uppercase;">PROJECT SUMMARY</td></tr>'
     );
   }
 
   // 2. Audio Highlights
   function createAudioHighlightsHeader() {
     return (
-      '<tr><td colspan="2" style="background-color: #EDE9FE; padding: 12px 16px; font-size: 13px; font-weight: 700; color: #4C1D95; text-align: left; border-bottom: 2px solid #e1d8f5; font-family: ' +
+      '<tr bgcolor="#EDE9FE" style="background-color: #EDE9FE;">' +
+      '<td colspan="2" bgcolor="#EDE9FE" style="background-color: #EDE9FE; padding: 12px 16px; font-size: 13px; font-weight: 700; color: #4C1D95; text-align: left; border-bottom: 2px solid #e1d8f5; font-family: ' +
       FONT_STACK +
-      '; text-transform: uppercase;">AUDIO HIGHLIGHTS</td></tr>'
+      '; line-height: 18px; mso-line-height-rule: exactly; text-transform: uppercase;">AUDIO HIGHLIGHTS</td></tr>'
     );
   }
 
   // 3. General Highlights
   function createGeneralHighlightsHeader() {
     return (
-      '<tr><td colspan="2" style="background-color: #EDE9FE; padding: 12px 16px; font-size: 13px; font-weight: 700; color: #4C1D95; text-align: left; border-bottom: 2px solid #e1d8f5; font-family: ' +
+      '<tr bgcolor="#EDE9FE" style="background-color: #EDE9FE;">' +
+      '<td colspan="2" bgcolor="#EDE9FE" style="background-color: #EDE9FE; padding: 12px 16px; font-size: 13px; font-weight: 700; color: #4C1D95; text-align: left; border-bottom: 2px solid #e1d8f5; font-family: ' +
       FONT_STACK +
-      '; text-transform: uppercase;">GENERAL HIGHLIGHTS</td></tr>'
+      '; line-height: 18px; mso-line-height-rule: exactly; text-transform: uppercase;">GENERAL HIGHLIGHTS</td></tr>'
     );
   }
 
   // 4. Update Follow-up
   function createUpdateFollowUpHeader() {
     return (
-      '<tr><td colspan="2" style="background-color: #EDE9FE; padding: 12px 16px; font-size: 13px; font-weight: 700; color: #4C1D95; text-align: left; border-bottom: 2px solid #e1d8f5; font-family: ' +
+      '<tr bgcolor="#EDE9FE" style="background-color: #EDE9FE;">' +
+      '<td colspan="2" bgcolor="#EDE9FE" style="background-color: #EDE9FE; padding: 12px 16px; font-size: 13px; font-weight: 700; color: #4C1D95; text-align: left; border-bottom: 2px solid #e1d8f5; font-family: ' +
       FONT_STACK +
-      '; text-transform: uppercase;">UPDATE FOLLOW-UP</td></tr>'
+      '; line-height: 18px; mso-line-height-rule: exactly; text-transform: uppercase;">UPDATE FOLLOW-UP</td></tr>'
     );
   }
 
   // 5. Questions
   function createQuestionsHeader() {
     return (
-      '<tr><td colspan="2" style="background-color: #EDE9FE; padding: 12px 16px; font-size: 13px; font-weight: 700; color: #4C1D95; text-align: left; border-bottom: 2px solid #e1d8f5; font-family: ' +
+      '<tr bgcolor="#EDE9FE" style="background-color: #EDE9FE;">' +
+      '<td colspan="2" bgcolor="#EDE9FE" style="background-color: #EDE9FE; padding: 12px 16px; font-size: 13px; font-weight: 700; color: #4C1D95; text-align: left; border-bottom: 2px solid #e1d8f5; font-family: ' +
       FONT_STACK +
-      '; text-transform: uppercase;">QUESTIONS</td></tr>'
+      '; line-height: 18px; mso-line-height-rule: exactly; text-transform: uppercase;">QUESTIONS</td></tr>'
     );
   }
 
   // 6. Milestones
   function createMilestonesHeader() {
     return (
-      '<tr><td colspan="2" style="background-color: #EDE9FE; padding: 12px 16px; font-size: 13px; font-weight: 700; color: #4C1D95; text-align: left; border-bottom: 2px solid #e1d8f5; font-family: ' +
+      '<tr bgcolor="#EDE9FE" style="background-color: #EDE9FE;">' +
+      '<td colspan="2" bgcolor="#EDE9FE" style="background-color: #EDE9FE; padding: 12px 16px; font-size: 13px; font-weight: 700; color: #4C1D95; text-align: left; border-bottom: 2px solid #e1d8f5; font-family: ' +
       FONT_STACK +
-      '; text-transform: uppercase;">MILESTONES</td></tr>'
+      '; line-height: 18px; mso-line-height-rule: exactly; text-transform: uppercase;">MILESTONES</td></tr>'
     );
   }
 
   // 7. TVB Content (With Link Capability)
   function createTvbHeader(link) {
     const title = 'TVB CONTENT';
+
     const displayTitle = !isEmptyValue(link)
       ? '<a href="' +
         escapeHTML(link) +
@@ -533,10 +584,12 @@
         title +
         '</a>'
       : title;
+
     return (
-      '<tr><td colspan="2" style="background-color: #EDE9FE; padding: 12px 16px; font-size: 13px; font-weight: 700; color: #4C1D95; text-align: left; border-bottom: 2px solid #e1d8f5; font-family: ' +
+      '<tr bgcolor="#EDE9FE" style="background-color: #EDE9FE;">' +
+      '<td colspan="2" bgcolor="#EDE9FE" style="background-color: #EDE9FE; padding: 12px 16px; font-size: 13px; font-weight: 700; color: #4C1D95; text-align: left; border-bottom: 2px solid #e1d8f5; font-family: ' +
       FONT_STACK +
-      '; text-transform: uppercase;">' +
+      '; line-height: 18px; mso-line-height-rule: exactly; text-transform: uppercase;">' +
       displayTitle +
       '</td></tr>'
     );
@@ -545,6 +598,7 @@
   // 8. Heatmap Content (With Link Capability)
   function createHeatmapHeader(link) {
     const title = 'HEATMAP CONTENT';
+
     const displayTitle = !isEmptyValue(link)
       ? '<a href="' +
         escapeHTML(link) +
@@ -554,10 +608,12 @@
         title +
         '</a>'
       : title;
+
     return (
-      '<tr><td colspan="2" style="background-color: #EDE9FE; padding: 12px 16px; font-size: 13px; font-weight: 700; color: #4C1D95; text-align: left; border-bottom: 2px solid #e1d8f5; font-family: ' +
+      '<tr bgcolor="#EDE9FE" style="background-color: #EDE9FE;">' +
+      '<td colspan="2" bgcolor="#EDE9FE" style="background-color: #EDE9FE; padding: 12px 16px; font-size: 13px; font-weight: 700; color: #4C1D95; text-align: left; border-bottom: 2px solid #e1d8f5; font-family: ' +
       FONT_STACK +
-      '; text-transform: uppercase;">' +
+      '; line-height: 18px; mso-line-height-rule: exactly; text-transform: uppercase;">' +
       displayTitle +
       '</td></tr>'
     );
@@ -566,6 +622,7 @@
   // 9. Platforms Tracking (With Link Capability)
   function createPlatformsHeader(link) {
     const title = 'PLATFORMS TRACKING';
+
     const displayTitle = !isEmptyValue(link)
       ? '<a href="' +
         escapeHTML(link) +
@@ -575,10 +632,12 @@
         title +
         '</a>'
       : title;
+
     return (
-      '<tr><td colspan="2" style="background-color: #EDE9FE; padding: 12px 16px; font-size: 13px; font-weight: 700; color: #4C1D95; text-align: left; border-bottom: 2px solid #e1d8f5; font-family: ' +
+      '<tr bgcolor="#EDE9FE" style="background-color: #EDE9FE;">' +
+      '<td colspan="2" bgcolor="#EDE9FE" style="background-color: #EDE9FE; padding: 12px 16px; font-size: 13px; font-weight: 700; color: #4C1D95; text-align: left; border-bottom: 2px solid #e1d8f5; font-family: ' +
       FONT_STACK +
-      '; text-transform: uppercase;">' +
+      '; line-height: 18px; mso-line-height-rule: exactly; text-transform: uppercase;">' +
       displayTitle +
       '</td></tr>'
     );
@@ -596,18 +655,29 @@
 
     // 2. Sub-Judul Proyek
     const dynamicParts = [data.projectName, data.projectType, data.updateNumber];
+
     const filteredParts = dynamicParts.filter((part) => !isEmptyValue(part));
+
     const dynamicSubtitle = filteredParts.join(' - ');
-    if (!isEmptyValue(dynamicSubtitle)) rows.push(createProjectSubHeader(dynamicSubtitle));
+
+    if (!isEmptyValue(dynamicSubtitle)) {
+      rows.push(createProjectSubHeader(dynamicSubtitle));
+    }
 
     // 3. Tanggal
     const formattedDate = formatDate(data.reportDate);
-    if (formattedDate) rows.push(createDateSubHeader(formattedDate));
+
+    if (formattedDate) {
+      rows.push(createDateSubHeader(formattedDate));
+    }
 
     // --- SECTION: Project Summary ---
     rows.push(createProjectSummaryHeader());
+
     rows.push(createRow('Version', escapeHTML(data.version)));
+
     rows.push(createRow('Build Link', escapeHTML(data.buildLink)));
+
     rows.push(
       createRow(
         'Total Issues',
@@ -616,6 +686,7 @@
           : createLinkHtml(data.totalIssuesLink, data.totalIssues)
       )
     );
+
     rows.push(
       createRow(
         'Major Issues',
@@ -624,15 +695,19 @@
           : createLinkHtml(data.majorIssuesLink, data.majorIssues)
       )
     );
+
     rows.push(
       createRow('Licensed Content', createStatusBadge(data.licensedContent, data.licensedNote))
     );
+
     rows.push(
       createRow('Audio Credits', createStatusBadge(data.audioCredits, data.audioCreditsNote))
     );
+
     rows.push(
       createRow('Result Status', createStatusBadge(data.resultStatus, data.resultStatusNote))
     );
+
     if (!isEmptyValue(data.testers)) {
       rows.push(createRow('Testers', escapeHTML(data.testers)));
 
@@ -692,6 +767,7 @@
     rows.push(createTableFooter('Audio QA'));
 
     const body = rows.join('');
+
     if (body === '') return '';
 
     return (
@@ -715,9 +791,11 @@
 
   window.updateEmailPreview = function updateEmailPreview() {
     const container = document.getElementById(CONFIG.previewContainerId);
+
     if (!container) return;
 
     let html = '';
+
     try {
       const data = getFormDataForPreview();
       const tableHtml = generateReportHTML(data);
@@ -725,6 +803,7 @@
       // Jika tabel tidak kosong, kita buat wrapper dengan Intro dan Outro
       if (tableHtml && !isEmptyValue(tableHtml)) {
         const projectName = data.projectName || 'Project'; // Fallback jika nama proyek kosong
+
         const formattedDate = formatDate(data.reportDate);
 
         // Gaya untuk teks pembuka dan penutup agar konsisten dengan tabel
@@ -786,10 +865,12 @@
         // Gabungkan semuanya: Intro + Spacer + Tabel + Spacer + Outro
         html = introHtml + createSpacerBlock(20) + tableHtml + createSpacerBlock(20) + outroHtml;
       } else {
-        html = ''; // Jika tabel kosong, biarkan html kosong untuk memicu placeholder
+        // Jika tabel kosong, biarkan html kosong untuk memicu placeholder
+        html = '';
       }
     } catch (err) {
       console.error('[email-preview] Gagal membuat preview:', err);
+
       return;
     }
 
@@ -808,37 +889,61 @@
   ========================================================================== */
 
   let updateScheduled = false;
+
   function scheduleUpdate() {
     if (updateScheduled) return;
+
     updateScheduled = true;
+
     const run = function () {
       updateScheduled = false;
       window.updateEmailPreview();
     };
-    if (window.requestAnimationFrame) window.requestAnimationFrame(run);
-    else setTimeout(run, 0);
+
+    if (window.requestAnimationFrame) {
+      window.requestAnimationFrame(run);
+    } else {
+      setTimeout(run, 0);
+    }
   }
 
   function setupFormListeners() {
     const form = document.getElementById(CONFIG.formId);
+
     if (!form) return;
+
     form.addEventListener('input', scheduleUpdate);
+
     form.addEventListener('change', scheduleUpdate);
   }
 
   function setupTinyMceListeners() {
-    if (!window.tinymce || typeof window.tinymce.on !== 'function') return;
+    if (!window.tinymce || typeof window.tinymce.on !== 'function') {
+      return;
+    }
+
     const bindEditor = function (editor) {
-      if (!editor || editor.__emailPreviewBound) return;
+      if (!editor || editor.__emailPreviewBound) {
+        return;
+      }
+
       editor.__emailPreviewBound = true;
+
       editor.on('init change input keyup undo redo SetContent blur', scheduleUpdate);
     };
+
     CONFIG.tinyMceIds.forEach(function (id) {
       const editor = window.tinymce.get ? window.tinymce.get(id) : null;
-      if (editor) bindEditor(editor);
+
+      if (editor) {
+        bindEditor(editor);
+      }
     });
+
     window.tinymce.on('AddEditor', function (e) {
-      if (CONFIG.tinyMceIds.indexOf(e.editor.id) !== -1) bindEditor(e.editor);
+      if (CONFIG.tinyMceIds.indexOf(e.editor.id) !== -1) {
+        bindEditor(e.editor);
+      }
     });
   }
 
@@ -847,15 +952,23 @@
       callback();
       return;
     }
+
     const deadline = Date.now() + (timeoutMs || 5000);
+
     const check = function () {
       const allReady = CONFIG.tinyMceIds.every((id) => {
         const editor = window.tinymce.get ? window.tinymce.get(id) : null;
+
         return editor && editor.initialized;
       });
-      if (allReady || Date.now() > deadline) callback();
-      else setTimeout(check, 100);
+
+      if (allReady || Date.now() > deadline) {
+        callback();
+      } else {
+        setTimeout(check, 100);
+      }
     };
+
     check();
   }
 
@@ -863,10 +976,15 @@
     setupFormListeners();
     setupTinyMceListeners();
     window.updateEmailPreview();
+
     waitForEditorsReady(() => scheduleUpdate());
   }
 
-  if (document.readyState === 'loading')
-    document.addEventListener('DOMContentLoaded', init, { once: true });
-  else init();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, {
+      once: true,
+    });
+  } else {
+    init();
+  }
 })();

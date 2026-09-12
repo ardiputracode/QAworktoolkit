@@ -37,59 +37,70 @@ document.addEventListener('DOMContentLoaded', () => {
      * LANGKAH B: MENDEFINISIKAN LOGIKA NAVIGASI (Inti dari sistem ini)
      * Fungsi ini bertanggung jawab untuk melakukan proses "tukar tampilan".
      *
-     * @param {string} targetId - ID dari elemen halaman yang ingin ditampilkan.
+         /**
+         /**
+     * @param {string} targetId - ID dari elemen halaman atau elemen di dalamnya yang ingin dituju.
      */
     function navigateTo(targetId) {
-      // Menghapus tanda '#' agar kita mendapatkan ID murni (contoh: '#home' menjadi 'home')
       const id = targetId.replace('#', '');
-      const targetPage = document.getElementById(id);
+      const targetElement = document.getElementById(id);
 
-      // Jika halaman yang dituju tidak ada di HTML, batalkan proses
-      if (!targetPage) {
-        console.warn(`[Warning] Target page not found: ${targetId} ⚠️`);
+      // 1. Validasi: Jika target tidak ditemukan
+      if (!targetElement) {
+        console.warn(`[Warning] Target not found: ${targetId} ⚠️`);
         return;
       }
 
-      // --- TAHAP 3: ACTION (Proses perpindahan halaman secara visual) ---
+      // 2. Cari Induk Section (.page) dari elemen yang diklik
+      const actualPage = targetElement.closest('.page');
+
+      if (!actualPage) {
+        console.warn(`[Warning] Target is not inside a .page section ⚠️`);
+        return;
+      }
+
+      const pageIdToDisplay = actualPage.id;
+
       console.log(
-        `%c[Action] Switched to page: ${id.toUpperCase()} 🗺️`,
+        `%c[Action] Switched to page: ${pageIdToDisplay.toUpperCase()} 🗺️`,
         'color: #8b5cf6; font-weight: bold;'
       );
 
-      /**
-       * PROSES 1: SEMBUNYIKAN SEMUA HALAMAN
-       * Kita melakukan perulangan pada semua halaman dan memberikan atribut 'hidden'.
-       * Ini membuat semua halaman tidak terlihat oleh pengguna.
-       */
+      // --- PROSES PERPINDAHAN HALAMAN (Sama seperti sebelumnya) ---
+
+      // PROSES 1: SEMBUNYIKAN SEMUA HALAMAN
       pages.forEach((page) => {
-        page.setAttribute('hidden', ''); // Membuat elemen hilang dari pandangan
-        page.classList.remove('is-active'); // Menghapus class aktif (untuk styling CSS)
+        page.setAttribute('hidden', '');
+        page.classList.remove('is-active');
       });
 
-      /**
-       * PROSES 2: TAMPILKAN HALAMAN TARGET
-       * Sekarang, kita hanya menampilkan halaman yang dipilih dengan menghapus atribut 'hidden'.
-       */
-      targetPage.removeAttribute('hidden');
-      targetPage.classList.add('is-active');
+      // PROSES 2: TAMPILKAN HALAMAN INDUK (Actual Page)
+      actualPage.removeAttribute('hidden');
+      actualPage.classList.add('is-active');
 
-      /**
-       * PROSES 3: UPDATE STATUS MENU (Highlight Menu Aktif)
-       * Agar user tahu mereka sedang di menu mana, kita memberi tanda 'is-active'
-       * pada link yang sesuai dengan halaman saat ini.
-       */
+      // PROSES 3: UPDATE STATUS MENU (Highlight Menu Aktif)
       navLinks.forEach((link) => {
         const linkHref = link.getAttribute('href');
-        if (linkHref === targetId) {
-          // Jika href link sama dengan ID halaman, beri tanda aktif
+        if (linkHref === `#${pageIdToDisplay}`) {
           link.classList.add('is-active');
-          link.setAttribute('aria-current', 'page'); // Standar aksesibilitas untuk pembaca layar
+          link.setAttribute('aria-current', 'page');
         } else {
-          // Jika tidak, hapus tandanya
           link.classList.remove('is-active');
           link.removeAttribute('aria-current');
         }
       });
+
+      // --- [FIX] PROSES 4: LOGIKA SCROLLING YANG CERDAS ---
+
+      if (targetElement === actualPage) {
+        // KONDISI A: Jika yang diklik adalah menu utama (misal: #page-home)
+        // Kita ingin layar kembali ke posisi paling atas halaman.
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        // KONDISI B: Jika yang diklik adalah elemen di dalam halaman (misal: form dari banner)
+        // Kita melompat tepat ke elemen tersebut.
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
 
     /**

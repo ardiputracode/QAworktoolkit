@@ -141,14 +141,14 @@
       showStatus(
         statusElement,
         `
-    <strong>Copied!</strong> Paste into <strong>Outlook Web or Outlook App</strong> using
+   <center> <strong>Copied!</strong> Paste into <strong>Outlook Web or Outlook App</strong> using
     <strong>Keep Source Formatting</strong>.
     <br>
     <span class="paste-hint">
       Right-click → Paste Options → <strong>Keep Source Formatting</strong>
       <br>
       💡 Tip: Set it as your default paste option for faster pasting next time.
-    </span>
+    </span></center>
   `
       );
     } catch (error) {

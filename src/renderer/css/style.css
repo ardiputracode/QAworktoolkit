@@ -1612,7 +1612,7 @@ body .tox .tox-selectfield select {
   background-color: var(--bg-surface-2);
 }
 
-.status {
+.statuscopy {
   max-width: 680px;
   margin: 12px auto 0;
   padding: 12px 16px;
@@ -1632,16 +1632,16 @@ body .tox .tox-selectfield select {
     border-color 0.2s ease;
 }
 
-.status:empty {
+.statuscopy:empty {
   display: none;
 }
 
-.status strong {
+.statuscopy strong {
   color: var(--status-strong);
   font-weight: 650;
 }
 
-.status .paste-hint {
+.statuscopy .paste-hint {
   display: inline-block;
   margin-top: 6px;
 
