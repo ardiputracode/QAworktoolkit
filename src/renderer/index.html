@@ -2,13 +2,27 @@
 <html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
+
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+        default-src 'self';
+        script-src 'self';
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src 'self' https://fonts.gstatic.com;
+        img-src 'self' data: https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net;
+      "
+    />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <meta
       name="description"
-      content="Work Toolkit untuk Report Builder, Bug Report Formatter, dan Settings."
+      content="Work Toolkit untuk Report Builder, Bug Description Formatter, dan Settings."
     />
+
     <title>Work Toolkit</title>
-    <!-- Load file CSS -->
+
     <link rel="stylesheet" href="./css/style.css" />
   </head>
 
@@ -24,8 +38,8 @@
           Home
         </a>
         <a href="#page-report-builder" class="nav-link" data-page-link> Report Builder </a>
-        <a href="#page-bug-report-formatter" class="nav-link" data-page-link>
-          Bug Report Formatter
+        <a href="#page-bug-description-formatter" class="nav-link" data-page-link>
+          Bug Description Formatter
         </a>
         <a href="#page-settings" class="nav-link" data-page-link> Settings </a>
         <a href="#page-about" class="nav-link" data-page-link> About </a>
@@ -104,7 +118,7 @@
             <div class="card action-card">
               <div class="action-header">
                 <span class="action-icon">🐞</span>
-                <h4>Format Bug Report</h4>
+                <h4>Format Bug Description</h4>
               </div>
               <p>
                 Transforming structured but rough bug information—with incomplete sentences,
@@ -112,7 +126,7 @@
                 Jira-ready bug description.
               </p>
               <a
-                href="#page-bug-report-formatter"
+                href="#page-bug-description-formatter"
                 class="btn btn--primary btn--small action-btn"
                 data-page-link
                 >Open Bug Formatter →</a
@@ -938,14 +952,16 @@
         </section>
       </section>
 
-      <!-- --------------------- SECTION: BUG REPORT FORMATTER --------------------- -->
+      <!-- --------------------- SECTION: Bug Description Formatter --------------------- -->
       <section
-        id="page-bug-report-formatter"
+        id="page-bug-description-formatter"
         class="page"
         hidden
-        aria-labelledby="page-bug-report-formatter-title"
+        aria-labelledby="page-bug-description-formatter-title"
       >
-        <h1 class="page-title" id="page-bug-report-formatter-title">Bug Report Formatter</h1>
+        <h1 class="page-title" id="page-bug-description-formatter-title">
+          Bug Description Formatter
+        </h1>
 
         <!-- Form: Bug Report Form -->
         <form id="bug-report-form" class="card">
@@ -1181,11 +1197,9 @@
           <!-- Sub-section: Additional Notes -->
           <fieldset class="form-section">
             <legend>Additional Notes</legend>
-
             <div class="list-header">
               <span class="note-details">
                 Note Details
-
                 <button
                   type="button"
                   class="btn btn--info btn--small"
@@ -1199,25 +1213,14 @@
               <span>Action</span>
             </div>
 
+            <!-- [CHANGE] note-list sekarang kosong (0 baris default) -->
             <div
               id="note-list"
               class="dynamic-list"
               data-dynamic-list
               data-field-label="Note details"
               aria-live="polite"
-            >
-              <div class="dynamic-row" data-row data-initial-row>
-                <label class="row-field">
-                  <span class="row-label" data-row-label> Note details 1 </span>
-                  <input class="form-input" type="text" name="noteDetails[]" data-row-input />
-                </label>
-                <div class="row-action">
-                  <button type="button" class="btn btn--danger btn--small" data-action="remove-row">
-                    Remove
-                  </button>
-                </div>
-              </div>
-            </div>
+            ></div>
 
             <template id="note-row-template">
               <div class="dynamic-row" data-row>
@@ -1409,14 +1412,6 @@
 
             <div class="form-actions">
               <button
-                type="button"
-                class="btn btn--primary"
-                data-action="save-jira"
-                data-status-target="jira-status"
-              >
-                Save Jira Configuration
-              </button>
-              <button
                 type="reset"
                 class="btn"
                 data-action="reset-jira"
@@ -1475,14 +1470,6 @@
             </div>
 
             <div class="form-actions">
-              <button
-                type="button"
-                class="btn btn--primary"
-                data-action="save-openwebui"
-                data-status-target="openwebui-status"
-              >
-                Save Open WebUI Configuration
-              </button>
               <button
                 type="reset"
                 class="btn"
@@ -1549,6 +1536,7 @@
     <script src="./js/project-name-loader.js"></script>
     <script type="module" src="./js/jira-api.js"></script>
     <script type="module" src="./js/openwebui-api.js"></script>
+    <script src="./js/bug-formatter-logic.js"></script>
     <script src="./js/info-dialog.js"></script>
     <script type="module" src="./js/report-builder-save-logic.js"></script>
     <script src="./js/subject-auto-fill.js"></script>

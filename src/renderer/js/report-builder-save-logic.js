@@ -231,6 +231,13 @@ function reconstructDynamicList(containerId, templateId, values) {
   const template = document.getElementById(templateId);
   if (!container || !template) return;
 
+  // GUARD: pastikan container ini benar-benar bagian dari report-builder-form.
+  // document.getElementById() mencari ke SELURUH dokumen, bukan cuma di dalam
+  // form ini. Jika containerId kebetulan sama dengan ID milik form lain (mis.
+  // #step-list milik Bug Description Formatter), tanpa guard ini kita akan
+  // salah membersihkan/mengisi ulang list milik halaman lain tersebut.
+  if (form && !form.contains(container)) return;
+
   // Bersihkan container terlebih dahulu, baru cek validitas values.
   // Ini mencegah data dynamic list dari draft sebelumnya tertinggal
   // ketika draft baru tidak punya data untuk list ini.

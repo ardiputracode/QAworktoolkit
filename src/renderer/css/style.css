@@ -1612,6 +1612,27 @@ body .tox .tox-selectfield select {
   background-color: var(--bg-surface-2);
 }
 
+.form-select:disabled {
+  background-color: var(--bg-surface-2);
+  color: var(--text-muted);
+  border-color: var(--border-subtle);
+  cursor: not-allowed;
+  opacity: 1; /* Biar browser tidak otomatis bikin terlalu transparan */
+}
+
+/* Mencegah efek hover */
+.form-select:disabled:hover {
+  background-color: var(--bg-surface-2);
+  border-color: var(--border-subtle);
+}
+
+/* Mencegah efek focus */
+.form-select:disabled:focus {
+  background-color: var(--bg-surface-2);
+  border-color: var(--border-subtle);
+  box-shadow: none;
+}
+
 .statuscopy {
   max-width: 680px;
   margin: 12px auto 0;
