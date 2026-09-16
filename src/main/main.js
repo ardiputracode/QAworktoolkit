@@ -42,6 +42,52 @@ function createWindow() {
 }
 
 /**
+ * [NEW] LOGIKA KIRIM PROMPT KE OPEN WEBUI (IPC HANDLER)
+ */
+ipcMain.handle(
+  'send-openwebui-prompt',
+  async (event, { token, model, systemPrompt, userPrompt }) => {
+    try {
+      if (!OPEN_WEBUI_URL) throw new Error('URL Open WebUI tidak dikonfigurasi.');
+      if (!token) throw new Error('API Token diperlukan.');
+
+      const apiUrl = `${OPEN_WEBUI_URL.replace(/\/$/, '')}/api/chat/completions`;
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          stream: false,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Gagal mengirim prompt (Status: ${response.status})`);
+      }
+
+      const data = await response.json();
+      // Ambil konten jawaban dari struktur OpenAI/OpenWebUI
+      const content = data.choices?.[0]?.message?.content;
+
+      if (!content) throw new Error('AI memberikan respon kosong.');
+
+      return { success: true, data: content };
+    } catch (error) {
+      console.error('Error sending prompt to Open WebUI:', error);
+      return { success: false, message: error.message };
+    }
+  }
+);
+
+/**
  * [NEW] LOGIKA AMBIL DAFTAR MODEL DARI OPEN WEBUI (IPC HANDLER)
  */
 ipcMain.handle('get-openwebui-models', async (event, token) => {

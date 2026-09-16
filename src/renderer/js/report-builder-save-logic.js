@@ -409,7 +409,22 @@ async function refreshDraftsList() {
   }
 
   // --- FILTER AUTOSAVE SEBELUM CEK KOSONG ---
-  const manualDrafts = drafts.filter((draft) => draft.id !== AUTOSAVE_FIXED_ID);
+  // Difilter berdasarkan prefix "autosave-", bukan cuma AUTOSAVE_FIXED_ID
+  // milik Report Builder sendiri. Ini supaya entry autosave milik halaman
+  // lain yang berbagi store yang sama (mis. 'autosave-bug-description-
+  // formatter' dari bug-formatter-autosave.js) tidak ikut tampil sebagai
+  // "manual draft" di sini beserta tombol Open/Delete/Export/Import-nya
+  // (yang kalau dipakai akan salah mengisi form ini dengan data bug report).
+  //
+  // PENTING: draft manual disimpan TANPA properti 'id' eksplisit (lihat
+  // draftToSave di bawah), sehingga object store ('id', autoIncrement: true)
+  // memberi id berupa ANGKA untuknya. Sedangkan seluruh entry autosave kita
+  // pakai id berupa STRING ('autosave-...'). Karena tipe id bisa campuran,
+  // wajib di-cek typeof dulu sebelum .startsWith(), atau .startsWith akan
+  // error saat dipanggil pada draft manual yang id-nya angka.
+  const manualDrafts = drafts.filter(
+    (draft) => !(typeof draft.id === 'string' && draft.id.startsWith('autosave-'))
+  );
 
   if (manualDrafts.length === 0) {
     draftsContainer.innerHTML =

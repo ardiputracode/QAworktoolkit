@@ -9,4 +9,5 @@ contextBridge.exposeInMainWorld('qaToolkit', {
   getQaLead: () => ipcRenderer.invoke('get-qa-lead'),
   testOpenWebUI: (token) => ipcRenderer.invoke('test-openwebui', token),
   getOpenWebUIModels: (token) => ipcRenderer.invoke('get-openwebui-models', token),
+  sendOpenWebUIPrompt: (payload) => ipcRenderer.invoke('send-openwebui-prompt', payload),
 });
