@@ -7,6 +7,12 @@ const LEGACY_USERNAME_MARKER = 'as: ';
 const ALLOWED_AVATAR_HOSTS = ['atlassian.com', 'atlassian.net', 'atl-paas.net'];
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // --- [NEW] Konfigurasi field auto-count (Total Issues & Major Issues) ---
+// [FIX] TTL untuk cache auto-count. Sebelumnya, selama URL filter tidak
+// berubah, runFetch() SELALU di-skip (kecuali klik refresh manual) walaupun
+// jumlah tiket di Jira sudah berubah sejak terakhir fetch. Dengan TTL ini,
+// count akan otomatis di-fetch ulang kalau data terakhir sudah lebih tua
+// dari batas waktu berikut, meski URL-nya sama persis.
+const ISSUE_COUNT_CACHE_TTL_MS = 5 * 60 * 1000; // 5 menit
 const ISSUE_COUNT_FIELDS = [
   {
     linkInputId: 'total-issues-link',
@@ -316,12 +322,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       return null;
     }
     let lastFetchedUrl = null;
+    let lastFetchedAt = null; // [FIX] dipakai untuk cek staleness (TTL)
     try {
       const cachedRaw = localStorage.getItem(`jiraIssueCount:${config.countInputId}`);
       if (cachedRaw) {
         const cached = JSON.parse(cachedRaw);
         if (cached && cached.url === linkInput.value.trim()) {
           lastFetchedUrl = cached.url;
+          lastFetchedAt = cached.at;
           fetchedAtSpan.textContent = `${formatFetchedAt(new Date(cached.at))} (approx.)`;
         }
       }
@@ -334,7 +342,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         fetchedAtSpan.textContent = 'URL filter tidak valid';
         return;
       }
-      if (!force && rawUrl === lastFetchedUrl) return;
+      // [FIX] Sebelumnya: skip kalau URL sama, titik. Sekarang: skip hanya
+      // kalau URL sama DAN cache masih fresh (belum lewat TTL) — jadi count
+      // tetap otomatis di-refresh secara berkala walau link tidak berubah.
+      const isCacheFresh =
+        lastFetchedAt != null && Date.now() - lastFetchedAt < ISSUE_COUNT_CACHE_TTL_MS;
+      if (!force && rawUrl === lastFetchedUrl && isCacheFresh) return;
       const originalBtnLabel = refreshBtn.textContent;
       refreshBtn.disabled = true;
       refreshBtn.textContent = '⏳';
@@ -351,6 +364,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           countInput.value = result.count;
           lastFetchedUrl = rawUrl;
           const now = new Date();
+          lastFetchedAt = now.getTime(); // [FIX] reset TTL sejak fetch terakhir
           fetchedAtSpan.textContent = `${formatFetchedAt(now)} (approx.)`;
           localStorage.setItem(
             `jiraIssueCount:${config.countInputId}`,

@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { google } = require('googleapis');
@@ -13,33 +13,6 @@ if (!app.isPackaged) {
 const GOOGLE_CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL;
 const GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 const OPEN_WEBUI_URL = process.env.OPEN_WEBUI_URL; // Di-inject saat build
-
-// --- HELPER: Google Auth ---
-function createGoogleAuth() {
-  if (!GOOGLE_CLIENT_EMAIL || !GOOGLE_PRIVATE_KEY) {
-    throw new Error('Google Service Account credentials tidak ditemukan.');
-  }
-  return new google.auth.GoogleAuth({
-    credentials: { client_email: GOOGLE_CLIENT_EMAIL, private_key: GOOGLE_PRIVATE_KEY },
-    scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
-  });
-}
-
-// --- WINDOW MANAGEMENT ---
-function createWindow() {
-  const mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
-    minWidth: 900,
-    minHeight: 600,
-    webPreferences: {
-      preload: path.join(__dirname, '../preload/preload.js'),
-      contextIsolation: true,
-      nodeIntegration: false,
-    },
-  });
-  mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
-}
 
 /**
  * [NEW] LOGIKA KIRIM PROMPT KE OPEN WEBUI (IPC HANDLER)
@@ -132,10 +105,6 @@ ipcMain.handle('get-openwebui-models', async (event, token) => {
   }
 });
 
-// main.js
-
-// ... existing code ...
-
 // ============================================================
 // [FIXED] LOGIKA TEST KONEKSI OPEN WEBUI (IPC HANDLER)
 // ============================================================
@@ -172,8 +141,6 @@ ipcMain.handle('test-openwebui', async (event, token) => {
   }
 });
 
-// ... rest of the code ...
-
 /**
  * Membuat Google Authentication menggunakan Service Account.
  *
@@ -209,11 +176,27 @@ function createWindow() {
       preload: path.join(__dirname, '../preload/preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
+      devTools: !app.isPackaged, // matikan DevTools sepenuhnya saat sudah dibundle (production)
     },
   });
-
+  mainWindow.maximize();
   // SESUAIKAN: Menuju ke renderer/index.html
   mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+
+  if (app.isPackaged) {
+    // Blokir shortcut F12 / Ctrl+Shift+I / Cmd+Opt+I
+    mainWindow.webContents.on('before-input-event', (event, input) => {
+      const isDevToolsShortcut =
+        input.key === 'F12' ||
+        ((input.control || input.meta) && input.shift && input.key.toLowerCase() === 'i');
+      if (isDevToolsShortcut) event.preventDefault();
+    });
+
+    // Jaga-jaga kalau DevTools sempat kebuka lewat jalur lain
+    mainWindow.webContents.on('devtools-opened', () => {
+      mainWindow.webContents.closeDevTools();
+    });
+  }
 }
 
 /**
@@ -558,6 +541,14 @@ ipcMain.handle(
 // --- Lifecycle App ---
 
 app.whenReady().then(() => {
+  // Hilangkan seluruh menu bar bawaan Electron (File/Edit/View/Window/Help),
+  // termasuk item "Toggle Developer Tools" dan "Reload" di dalamnya.
+  // Cuma dihilangkan saat sudah di-build (production) — waktu `npm start`
+  // (development), menu tetap tampil seperti biasa.
+  if (app.isPackaged) {
+    Menu.setApplicationMenu(null);
+  }
+
   createWindow();
 
   app.on('activate', () => {

@@ -35,9 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const modelSelect = document.getElementById('openwebui-model-select');
     const bugForm = document.getElementById('bug-report-form');
     // Karena tombol tidak punya ID di HTML, kita cari tombol submit di dalam form bug-report-form
-    const generateBtn = bugForm ? bugForm.querySelector('button[type="submit"]') : null;
+    const generateBtn = document.getElementById('btn-generate-bug');
     if (!modelSelect || !generateBtn) {
-      throw new Error('Required elements (model-select or generate-btn) not found in DOM.');
+      throw new Error('Required elements (model-select or btn-generate-bug) not found in DOM.');
     }
     /**
      * LOGIKA VALIDASI (Inti)

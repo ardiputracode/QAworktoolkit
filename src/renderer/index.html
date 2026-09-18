@@ -81,7 +81,7 @@
         <!-- Hero Section -->
         <div class="card hero-section">
           <h2 class="hero-title">Work Toolkit</h2>
-          <p class="hero-subtitle">Tools to simplify QA reporting and bug documentation.</p>
+          <p class="hero-subtitle">Tools to streamline QA reporting and bug documentation.</p>
         </div>
 
         <!-- Quick Actions -->
@@ -1011,9 +1011,9 @@
                   aria-required="true"
                 >
                   <option value="" selected disabled>Select one</option>
-                  <option value="player">Player</option>
-                  <option value="tester">Tester</option>
-                  <option value="player-tester">Player / Tester</option>
+                  <option value="Player">Player</option>
+                  <option value="Tester">Tester</option>
+                  <option value="Player/Tester">Player / Tester</option>
                 </select>
               </div>
 
@@ -1260,7 +1260,9 @@
                 <option value="" selected disabled>Select one</option>
               </select>
             </div>
-            <button type="submit" class="btn btn--primary">Generate Bug Description</button>
+            <button type="button" id="btn-generate-bug" class="btn btn--primary">
+              Generate Bug Description
+            </button>
           </div>
 
           <div id="bug-report-status" class="status" role="status" aria-live="polite"></div>

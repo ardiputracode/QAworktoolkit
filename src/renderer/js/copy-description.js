@@ -47,8 +47,10 @@
     const copyButtons = document.querySelectorAll('[data-action="copy-description"]');
     copyButtons.forEach((btn) => {
       const content = getPlainTextContent(btn.dataset.copyTarget);
-      // Tombol akan disabled jika konten kosong
-      btn.disabled = content === '';
+
+      // REPLACE: Tombol akan disabled jika konten kosong atau AI sedang berpikir
+      btn.disabled = content === '' || content === '⏳ AI is thinking... please wait...';
+
       // Opsional: Tambah sedikit transparansi jika disabled
       btn.style.opacity = btn.disabled ? '0.5' : '1';
       btn.style.cursor = btn.disabled ? 'not-allowed' : 'pointer';

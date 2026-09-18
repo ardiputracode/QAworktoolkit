@@ -223,7 +223,11 @@ function fillForm(data) {
   reconstructDynamicList('step-list', 'step-row-template', data.stepDescription);
   reconstructDynamicList('note-list', 'note-row-template', data.noteDetails);
 
-  form.dispatchEvent(new Event('input'));
+  // FIX: harus bubbles: true, kalau tidak event ini cuma nyampe ke listener
+  // yang nempel langsung di elemen `form` dan tidak pernah kedengaran oleh
+  // listener document-level (mis. jira-api.js), sehingga fitur auto-count
+  // Total Issues/Major Issues tidak pernah ter-refresh saat draft dimuat.
+  form.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 function reconstructDynamicList(containerId, templateId, values) {
@@ -773,7 +777,9 @@ async function clearReportBuilderForm() {
   //    debounce 1 detik), supaya draft autosave & Home section langsung sinkron.
   await performAutoSave();
 
-  form.dispatchEvent(new Event('input'));
+  // FIX: sama seperti di fillForm() — harus bubbles: true supaya listener
+  // document-level (jira-api.js) ikut kebagian event ini.
+  form.dispatchEvent(new Event('input', { bubbles: true }));
 
   showToast('Form berhasil dikosongkan.', 'success');
 }
