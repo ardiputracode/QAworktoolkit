@@ -129,6 +129,8 @@ const GOOGLE_SPREADSHEET_ID = process.env.GOOGLE_SPREADSHEET_ID;
 
 const OPEN_WEBUI_URL = process.env.OPEN_WEBUI_URL;
 
+const JIRA_BASE_URL = process.env.JIRA_BASE_URL;
+
 /**
  * Validasi credential.
  *
@@ -151,10 +153,15 @@ if (!OPEN_WEBUI_URL) {
   failBuild('OPEN_WEBUI_URL tidak ditemukan di file .env.');
 }
 
+if (!JIRA_BASE_URL) {
+  failBuild('JIRA_BASE_URL tidak ditemukan di file .env.');
+}
+
 console.log('      ✓ GOOGLE_CLIENT_EMAIL ditemukan.');
 console.log('      ✓ GOOGLE_PRIVATE_KEY ditemukan.');
 console.log('      ✓ GOOGLE_SPREADSHEET_ID ditemukan.');
 console.log('      ✓ OPEN_WEBUI_URL ditemukan.');
+console.log('      ✓ JIRA_BASE_URL ditemukan.');
 
 /**
  * Jangan pernah mencetak nilai credential ke terminal.
@@ -247,7 +254,7 @@ process.env.GOOGLE_CLIENT_EMAIL = ${JSON.stringify(GOOGLE_CLIENT_EMAIL)};
 process.env.GOOGLE_PRIVATE_KEY = ${JSON.stringify(GOOGLE_PRIVATE_KEY)};
 process.env.GOOGLE_SPREADSHEET_ID = ${JSON.stringify(GOOGLE_SPREADSHEET_ID)};
 process.env.OPEN_WEBUI_URL = ${JSON.stringify(OPEN_WEBUI_URL)};
-
+process.env.JIRA_BASE_URL = ${JSON.stringify(JIRA_BASE_URL)};
 `;
 
 /**

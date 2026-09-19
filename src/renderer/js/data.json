@@ -1,9 +1,0 @@
-{
-  "projectTypes": [
-    { "value": "Creation", "label": "Creation" },
-    { "value": "UPD", "label": "Update" },
-    { "value": "Expansion", "label": "Expansion" }
-  ],
-
-  "JIRA_BASE_URL": "https://gameloft.atlassian.net"
-}

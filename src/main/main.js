@@ -13,6 +13,7 @@ if (!app.isPackaged) {
 const GOOGLE_CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL;
 const GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 const OPEN_WEBUI_URL = process.env.OPEN_WEBUI_URL; // Di-inject saat build
+const JIRA_BASE_URL = process.env.JIRA_BASE_URL;
 
 /**
  * [NEW] LOGIKA KIRIM PROMPT KE OPEN WEBUI (IPC HANDLER)
@@ -340,25 +341,12 @@ ipcMain.handle('get-project-names', async () => {
  */
 ipcMain.handle('test-jira-connection', async (event, { email, token }) => {
   try {
-    // SESUAIKAN: Path menuju data.json berdasarkan struktur kamu
-    // Dari src/main/ naik dua kali ke root, lalu masuk ke src/renderer/js/data.json
-    const dataPath = path.join(__dirname, '../../src/renderer/js/data.json');
-
-    if (!fs.existsSync(dataPath)) {
-      return {
-        success: false,
-        message: `❌ File tidak ditemukan di: ${dataPath}`,
-      };
-    }
-
-    const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
-
-    const baseUrl = data.JIRA_BASE_URL;
+    const baseUrl = JIRA_BASE_URL;
 
     if (!baseUrl) {
       return {
         success: false,
-        message: '❌ JIRA_BASE_URL tidak ada di data.json',
+        message: '❌ JIRA_BASE_URL tidak ada di .env',
       };
     }
 
@@ -414,8 +402,8 @@ ipcMain.handle('test-jira-connection', async (event, { email, token }) => {
  * })
  *
  * - siteBaseUrl dikirim renderer hanya untuk divalidasi (harus sama dengan
- *   JIRA_BASE_URL yang dikonfigurasi di data.json) — request sesungguhnya
- *   tetap memakai JIRA_BASE_URL dari data.json, bukan host dari input user,
+ *   JIRA_BASE_URL yang dikonfigurasi di .env) — request sesungguhnya
+ *   tetap memakai JIRA_BASE_URL dari .env, bukan host dari input user,
  *   supaya email+token tidak pernah dikirim ke domain sembarangan.
  * - jql dipakai langsung kalau ada. Kalau yang ada cuma filterId, kita ambil
  *   dulu JQL-nya lewat endpoint /rest/api/3/filter/{id}.
@@ -425,23 +413,12 @@ ipcMain.handle(
 
   async (event, { email, token, siteBaseUrl, jql, filterId }) => {
     try {
-      const dataPath = path.join(__dirname, '../../src/renderer/js/data.json');
-
-      if (!fs.existsSync(dataPath)) {
-        return {
-          success: false,
-          message: `❌ File tidak ditemukan di: ${dataPath}`,
-        };
-      }
-
-      const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
-
-      const baseUrl = data.JIRA_BASE_URL;
+      const baseUrl = JIRA_BASE_URL;
 
       if (!baseUrl) {
         return {
           success: false,
-          message: '❌ JIRA_BASE_URL tidak ada di data.json',
+          message: '❌ JIRA_BASE_URL tidak ada di .env',
         };
       }
 

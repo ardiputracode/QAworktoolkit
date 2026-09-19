@@ -138,18 +138,13 @@
         copyPlainFallback(content);
       }
 
-      showStatus(
-        statusElement,
-        `
-   <center> <strong>Copied!</strong> Paste into <strong>Outlook Web or Outlook App</strong> using
-    <strong>Keep Source Formatting</strong>.
-    <br>
-    <span class="paste-hint">
-      Right-click → Paste Options → <strong>Keep Source Formatting</strong>
-      <br>
-      💡 Tip: Set it as your default paste option for faster pasting next time.
-    </span></center>
-  `
+      window.showInfoDialog(
+        'Copied!',
+        `Paste into <strong>Outlook Web or Outlook App</strong> using <strong>Keep Source Formatting</strong>.
+  <br>
+  Right-click → Paste Options → <strong>Keep Source Formatting</strong>
+  <br>
+  💡 Tip: Set it as your default paste option for faster pasting next time.`
       );
     } catch (error) {
       try {

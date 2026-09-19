@@ -7,13 +7,10 @@
  * 2. Mengelola penambahan dan penghapusan baris input secara dinamis pada Steps to Reproduce dan Additional Notes.
  * 3. Menghindari request API jika konfigurasi belum lengkap.
  */
-
 // Import dbManager untuk menghapus data autosave di IndexedDB [3]
 import { dbManager } from './db-manager.js';
-
 // ID unik autosave agar sinkron dengan bug-formatter-autosave.js [2]
 const BUG_AUTOSAVE_ID = 'autosave-bug-description-formatter';
-
 // --- TAHAP 1: LOADED ---
 console.log(
   '%c[System] Bug Formatter Module: File Loaded ✅',
@@ -91,14 +88,12 @@ document.addEventListener('DOMContentLoaded', () => {
         label.textContent = `${prefix} ${index + 1}`;
       });
     };
+
     /**
-     * LOGIKA: MENAMBAH BARIS (Add Row)
+     * FUNGSI PEMBANTU: Logika Inti Menambah Baris
+     * Dipisahkan agar bisa dipanggil oleh klik tombol maupun tombol Enter.
      */
-    const handleAddRow = (event) => {
-      const btn = event.currentTarget;
-      if (btn.dataset.action !== 'add-row') return;
-      const targetListId = btn.dataset.targetList;
-      const templateId = btn.dataset.templateId;
+    const addNewRow = (targetListId, templateId) => {
       const listContainer = document.getElementById(targetListId);
       const template = document.getElementById(templateId);
       if (!listContainer || !template) {
@@ -118,17 +113,16 @@ document.addEventListener('DOMContentLoaded', () => {
         'color: #10b981; font-weight: bold;'
       );
     };
+
     /**
-     * LOGIKA: MENGHAPUS BARIS (Remove Row)
+     * FUNGSI PEMBANTU: Logika Inti Menghapus Baris
+     * Dipisahkan agar bisa dipanggil oleh klik tombol maupun tombol Backspace.
      */
-    const handleRemoveRow = (event) => {
-      const btn = event.target;
-      if (btn.dataset.action !== 'remove-row') return;
-      const row = btn.closest('.dynamic-row');
-      if (!row) return;
+    const executeRemoveRow = (row) => {
       const listContainer = row.closest('.dynamic-list');
       if (!listContainer) return;
       const listId = listContainer.id;
+
       // Validasi: Hanya 'step-list' yang wajib punya minimal 1 baris.
       const allRows = listContainer.querySelectorAll('.dynamic-row');
       if (listId === 'step-list' && allRows.length <= 1) {
@@ -142,12 +136,14 @@ document.addEventListener('DOMContentLoaded', () => {
         );
         return;
       }
+
       // 1. Hapus elemen row
       row.remove();
       // 2. Update penomoran label
       const firstLabel = listContainer.querySelector('.row-label');
       const prefix = firstLabel ? firstLabel.textContent.replace(/\d+$/, '').trim() : 'Item';
       updateRowNumbers(listId, prefix);
+
       // --- TAMBAHAN: Trigger Autosave ---
       // Karena menghapus elemen DOM tidak memicu event 'input' secara alami,
       // kita harus mengirimkan event 'input' secara manual agar bug-formatter-autosave.js bereaksi.
@@ -155,11 +151,34 @@ document.addEventListener('DOMContentLoaded', () => {
       if (bugForm) {
         bugForm.dispatchEvent(new Event('input', { bubbles: true }));
       }
-      // --------------------------------
+
       console.log(
         `%c[Action] Row Removed 🗑️ from ${listId}. Remaining rows: ${listContainer.querySelectorAll('.dynamic-row').length}`,
         'color: #ef4444; font-weight: bold;'
       );
+    };
+
+    /**
+     * LOGIKA: MENAMBAH BARIS (Add Row)
+     */
+    const handleAddRow = (event) => {
+      const btn = event.currentTarget;
+      if (btn.dataset.action !== 'add-row') return;
+      const targetListId = btn.dataset.targetList;
+      const templateId = btn.dataset.templateId;
+      // Panggil fungsi pembantu untuk menambah baris
+      addNewRow(targetListId, templateId);
+    };
+    /**
+     * LOGIKA: MENGHAPUS BARIS (Remove Row)
+     */
+    const handleRemoveRow = (event) => {
+      const btn = event.target;
+      if (btn.dataset.action !== 'remove-row') return;
+      const row = btn.closest('.dynamic-row');
+      if (!row) return;
+      // Panggil fungsi pembantu untuk menghapus baris
+      executeRemoveRow(row);
     };
     /**
      * =========================================================================
@@ -197,10 +216,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (noteList) {
               noteList.innerHTML = '';
             }
-
             // UPDATE: Menghapus LocalStorage dan hanya menggunakan IndexedDB [3]
             await dbManager.deleteDraft(BUG_AUTOSAVE_ID);
-
             console.log(
               '%c[Action] Bug Form and IndexedDB cleared successfully 🧹',
               'color: #ef4444; font-weight: bold;'
@@ -246,6 +263,55 @@ document.addEventListener('DOMContentLoaded', () => {
         handleRemoveRow(event);
       }
     });
+
+    /**
+     * LOGIKA TAMBAHAN: Menangani Keyboard Shortcut (Enter & Backspace)
+     */
+    document.addEventListener('keydown', (event) => {
+      // 1. FITUR: Tombol Enter untuk menambah baris baru
+      if (event.key === 'Enter') {
+        const row = event.target.closest('.dynamic-row');
+        if (!row) return;
+
+        const listContainer = row.closest('.dynamic-list');
+        if (!listContainer) return;
+
+        const addBtn = document.querySelector(`button[data-target-list="${listContainer.id}"]`);
+        if (addBtn) {
+          event.preventDefault();
+          addNewRow(addBtn.dataset.targetList, addBtn.dataset.templateId);
+
+          // Auto-focus ke input terakhir di baris baru
+          const inputs = listContainer.querySelectorAll('input, textarea');
+          if (inputs.length > 0) inputs[inputs.length - 1].focus();
+        }
+      }
+
+      // 2. FITUR: Tombol Backspace untuk menghapus baris jika input kosong
+      if (event.key === 'Backspace') {
+        const target = event.target;
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+          const row = target.closest('.dynamic-row');
+          if (!row) return;
+
+          // Jika input kosong, hapus baris
+          if (target.value === '') {
+            event.preventDefault();
+            executeRemoveRow(row);
+
+            // Auto-focus ke input di baris sebelumnya
+            const allInputs = document.querySelectorAll(
+              '.dynamic-row input, .dynamic-row textarea'
+            );
+            const currentIndex = allInputs.indexOf(target);
+            if (currentIndex > 0) {
+              allInputs[currentIndex - 1].focus();
+            }
+          }
+        }
+      }
+    });
+
     // --- TAHAP 3: SUCCESS ---
     console.log(
       '%c[System] Bug Formatter Module: Initialization Complete! 🚀',
