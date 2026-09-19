@@ -1,57 +1,12 @@
 {
-  "name": "qaworktoolkit",
-  "version": "0.5.5",
-  "description": "QA Work Toolkit",
-  "main": "src/main/main-obfuscated.js",
-  "scripts": {
-    "start": "electron src/main/main.js",
-    "build:security": "node build-script.js",
-    "preportable": "node build-script.js",
-    "portable": "electron-builder --win portable",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ardiputracode/QAworktoolkit.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/ardiputracode/QAworktoolkit/issues"
-  },
-  "homepage": "https://github.com/ardiputracode/QAworktoolkit#readme",
-  "devDependencies": {
-    "electron": "^44.3.0",
-    "electron-builder": "^26.15.3",
-    "javascript-obfuscator": "^5.7.0",
-    "prettier": "^3.9.6"
-  },
-  "build": {
-    "appId": "com.qaworktoolkit.app",
-    "productName": "QA Work Toolkit",
-    "asar": true,
-    "directories": {
-      "output": "dist"
-    },
-    "files": [
-      "src/**/*",
-      "!src/main/main.js",
-      "package.json"
-    ],
-    "win": {
-      "target": [
-        "portable"
-      ]
-    },
-    "portable": {
-      "artifactName": "${productName} Portable ${version}.${ext}"
-    }
+  "name": "qa-toolkit-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22.x"
   },
   "dependencies": {
-    "dotenv": "^17.2.2",
-    "googleapis": "^178.1.1"
+    "googleapis": "^181.0.0"
   }
 }
